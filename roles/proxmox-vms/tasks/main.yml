@@ -1,0 +1,47 @@
+---
+- name: Create VM
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    name: rhel78test
+    cores: "{{ cpu_count }}"
+    memory: "{{ memory_size }}"
+    net: '{"net0":"virtio,bridge={{ proxmox_network }}"}'
+    clone: rhel-78-template
+    vmid: "{{ proxmox_template_vmid }}"
+    newid: 109
+    storage: "{{ proxmox_storage }}"
+    agent: yes
+    timeout: 500
+
+- name: Start VM
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    vmid: 109
+    state: started
+
+- name: Get network info from VM
+  shell: qm guest cmd 109 network-get-interfaces
+  retries: 20
+  delay: 2
+  register: vm_net
+  until:
+  - vm_net is not failed
+  - "'ip-addresses' in (vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]"
+
+- name: vm_net
+  debug:
+    var: vm_net
+
+- name: set fact
+  set_fact:
+    vm_ip: "{{ ((vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]['ip-addresses'] | selectattr('ip-address-type', 'equalto', 'ipv4') | list)[0]['ip-address'] }}"
+
+- name: vm_ip
+  debug:
+    var: vm_ip

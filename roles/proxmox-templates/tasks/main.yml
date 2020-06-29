@@ -1,0 +1,103 @@
+---
+- name: Install proxmoxer on proxmox host
+  package:
+    name: python-proxmoxer
+    state: present
+
+- name: Deploy ssh key file to proxmox host
+  copy:
+    dest: /tmp/admin_ssh_key
+    content: "{{ admin_ssh_key }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Ensure qcow storage dir exists
+  file:
+    path: "{{ proxmox_template_qcow_storage_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Upload cloud images
+  copy:
+    src: "{{ item.value.src_dir }}/{{ item.value.image }}"
+    dest: "{{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ proxmox_templates | dict2items }}"
+
+- name: Create VM templates
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    name: "template-{{ item.key }}"
+    cores: "{{ cpu_count }}"
+    memory: "{{ memory_size }}"
+    vmid: "{{ proxmox_template_starting_vmid + index }}"
+    net: '{"net0":"virtio,bridge={{ proxmox_network }}"}'
+    agent: yes
+  loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
+  register: __vm_dump
+
+- name: Check VM template state
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    name: "template-{{ item.key }}"
+    state: current
+  loop: "{{ proxmox_templates | dict2items }}"
+  retries: 10
+  delay: 2
+  until: __vm_dump is not failed
+  register: __vm_dump
+
+- name: Check if templates exist
+  shell: qm status {{ proxmox_template_starting_vmid + index }}
+  ignore_errors: yes
+  changed_when: false
+  register: __prox_template_info
+  loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
+
+- name: prox_template_info
+  debug:
+    var: __prox_template_info
+
+- name: Configure templates
+  shell: |
+    #!/bin/bash
+    set -e
+    qm importdisk {{ proxmox_template_starting_vmid + index }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
+    qm set {{ proxmox_template_starting_vmid + index }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ proxmox_template_starting_vmid + index }}-disk-0
+    qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
+    qm set {{ proxmox_template_starting_vmid + index }} --sshkeys /tmp/admin_ssh_key
+    qm template {{ proxmox_template_starting_vmid + index }}
+    touch "/tmp/{{ proxmox_template_starting_vmid + index }}_template_provisioned"
+  when: __prox_template_info.results[index] is not failed
+  async: 600
+  poll: 0
+  register: __prox_configure_templates
+  loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
+
+- name: Check on "Configure templates" task
+  async_status:
+    jid: "{{ async_result_item.ansible_job_id }}"
+  loop: "{{ __prox_configure_templates.results }}"
+  loop_control:
+    loop_var: async_result_item
+  until: job_result.finished
+  retries: 60
+  delay: 5
+  register: job_result

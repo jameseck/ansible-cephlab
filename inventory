@@ -1,0 +1,25 @@
+[proxmox_host]
+proxmox1 ansible_host=<IP_OR_FQDN> ansible_user=root
+
+[proxmox_host:vars]
+
+proxmox_user=root@pam
+proxmox_password=
+
+# The proxmox storage pool to use for templates and vms
+proxmox_storage=
+
+proxmox_network=vmbr0
+
+cpu_count=2
+memory_size=4096
+
+# A directory on the proxmox host to store the qcow images before import
+proxmox_template_qcow_storage_dir=
+
+# A directory on the local host (running ansible) which contains the qcow images described in roles/proxmox-templates/defaults/main.yml
+qcow_local_image_source_dir=
+
+# An ssh key to configure for templates and vm's
+# Should be a string in the format "ssh-rsa <blob>"
+admin_ssh_key=
