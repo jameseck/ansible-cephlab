@@ -1,0 +1,16 @@
+---
+- name: set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Register system with rhsm
+  redhat_subscription:
+    state: present
+    username: "{{ rhsm_username }}"
+    password: "{{ rhsm_password }}"
+    auto_attach: true
+
+# Declaring the repositories in a comma-separated string is much faster than a loop with a list
+- name: Enable rhsm repositories
+  rhsm_repository:
+    name: "{{ (ceph_repos[ceph_release | default(default_ceph_release)][ansible_distribution_major_version]) | join(',') }}"

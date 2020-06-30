@@ -1,3 +1,4 @@
 secret_inventory
 .*.swp
 .*.kate-swp
+ceph-ansible-inventory
