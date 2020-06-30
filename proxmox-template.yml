@@ -1,3 +1,4 @@
+---
 - hosts: proxmox_host
   roles:
   - proxmox-templates
