@@ -1,0 +1,67 @@
+---
+proxmox_vm_starting_vmid: 600
+
+# Pick one of the scenarios described in the vm_scenarios dict below
+vm_scenario: compact
+
+vm_scenarios:
+  compact:
+    ceph1:
+      template: template-rhel78
+      disks:
+        scsi1: 20
+        scsi2: 20
+      groups:
+      - mon
+      - osd
+      - mds
+    ceph2:
+      template: template-rhel78
+      disks:
+        scsi1: 20
+        scsi2: 20
+      groups:
+      - mon
+      - osd
+      - mds
+    ceph3:
+      template: template-rhel78
+      disks:
+        scsi1: 20
+        scsi2: 20
+      groups:
+      - mon
+      - osd
+  full:
+    mon1:
+      template: template-rhel78
+      groups:
+      - mon
+    mon2:
+      template: template-rhel78
+      groups:
+      - mon
+    mon3:
+      template: template-rhel78
+      groups:
+      - mon
+    osd1:
+      template: template-rhel78
+      groups:
+      - osd
+    osd2:
+      template: template-rhel78
+      groups:
+      - osd
+    osd3:
+      template: template-rhel78
+      groups:
+      - osd
+    mds1:
+      template: template-rhel78
+      groups:
+      - mds
+    mds2:
+      template: template-rhel78
+      groups:
+      - mds

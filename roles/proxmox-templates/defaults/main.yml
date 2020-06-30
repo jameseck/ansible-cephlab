@@ -2,9 +2,9 @@
 # The templates are created with predefined vmid's since the proxmox_kvm module makes it difficult to consume dynamic vmids
 proxmox_template_starting_vmid: 500
 proxmox_templates:
-  rhel78:
+  template-rhel78:
     image: rhel-server-7.8-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
-  rhel82:
+  template-rhel82:
     image: rhel-8.2-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"

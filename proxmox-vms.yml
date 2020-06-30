@@ -1,3 +1,24 @@
 - hosts: proxmox_host
   roles:
   - proxmox-vms
+
+- hosts: mon,osd,mds
+  gather_facts: no
+  tasks:
+  - name: Wait for SSH
+    wait_for_connection:
+      timeout: 60
+
+- hosts: mon
+  tasks:
+  - ping:
+
+- hosts: osd
+  tasks:
+  - ping:
+
+- hosts: mds
+  tasks:
+  - ping:
+
+
