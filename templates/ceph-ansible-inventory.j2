@@ -3,20 +3,5 @@
 {% for host in groups[group] %}
 {{ host }} ansible_ssh_host={{ hostvars[host].ansible_ssh_host }} ansible_user={{ hostvars[host].ansible_ssh_user }}
 {% endfor %}
+
 {% endfor %}
-
-#[mons]
-#localhost ansible_connection=local
-#
-#[grafana-server]
-#localhost ansible_connection=local
-#
-#[osds]
-#localhost ansible_connection=local
-#
-#[mgrs]
-#localhost ansible_connection=local
-#
-#[mdss]
-#localhost ansible_connection=local
-

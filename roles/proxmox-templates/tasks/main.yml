@@ -36,14 +36,10 @@
     api_host: "{{ groups['proxmox_host'][0] }}"
     node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
-    cores: "{{ cpu_count }}"
-    memory: "{{ memory_mb }}"
-    hotplug:
-    - network
-    - disk
-    - cpu
-    - memory
-    - usb
+    cores: "{{ item.value.cpu_count | default(default_vm_cpu_count) }}"
+    memory: "{{ item.value.memory_mb | default(default_vm_memory_mb) }}"
+    hotplug: network,disk,cpu,memory,usb
+    onboot: "{{ item.value.onboot | default(default_vm_onboot) }}"
     vmid: "{{ proxmox_template_starting_vmid + index }}"
     net: '{"net0":"virtio,bridge={{ proxmox_network }}"}'
     agent: yes
@@ -85,8 +81,10 @@
     set -e
     qm importdisk {{ proxmox_template_starting_vmid + index }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
     qm set {{ proxmox_template_starting_vmid + index }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ proxmox_template_starting_vmid + index }}-disk-0
-    qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
+    qm set {{ proxmox_template_starting_vmid + index }} --ide2 {{ proxmox_storage }}:cloudinit
     qm set {{ proxmox_template_starting_vmid + index }} --sshkeys /tmp/admin_ssh_key
+    qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
+    qm set {{ proxmox_template_starting_vmid + index }} --numa 1
     qm template {{ proxmox_template_starting_vmid + index }}
     touch "/tmp/{{ proxmox_template_starting_vmid + index }}_template_provisioned"
   when: __prox_template_info.results[index] is not failed
@@ -97,7 +95,7 @@
   loop_control:
     index_var: index
 
-- name: Check on "Configure templates" task
+- name: Check on "Configure templates" task - this can take a while due to copying qcow images
   async_status:
     jid: "{{ async_result_item.ansible_job_id }}"
   loop: "{{ __prox_configure_templates.results }}"

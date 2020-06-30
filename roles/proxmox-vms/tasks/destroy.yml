@@ -8,6 +8,7 @@
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"
     state: stopped
+  ignore_errors: yes
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index

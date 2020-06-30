@@ -28,14 +28,3 @@
 - hosts: mds
   tasks:
   - ping:
-
-- hosts: localhost
-  tasks:
-  - name: write_hostvars
-    copy:
-      dest: ./hostvars_all
-      content: "{{ hostvars }}"
-  - name: write_groups
-    copy:
-      dest: ./groups_all
-      content: "{{ groups }}"
