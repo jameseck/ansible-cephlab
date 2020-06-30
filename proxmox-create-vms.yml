@@ -3,6 +3,13 @@
   roles:
   - proxmox-vms
 
+- hosts: localhost
+  tasks:
+  - name: Create inventory file for ceph-ansible
+    template:
+      dest: ./ceph-ansible-inventory
+      src: templates/ceph-ansible-inventory.j2
+
 - hosts: mon,osd,mds
   gather_facts: no
   tasks:
@@ -21,3 +28,14 @@
 - hosts: mds
   tasks:
   - ping:
+
+- hosts: localhost
+  tasks:
+  - name: write_hostvars
+    copy:
+      dest: ./hostvars_all
+      content: "{{ hostvars }}"
+  - name: write_groups
+    copy:
+      dest: ./groups_all
+      content: "{{ groups }}"

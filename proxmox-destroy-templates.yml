@@ -1,0 +1,7 @@
+---
+- hosts: proxmox_host
+  tasks:
+  - name: Destroy VM templates
+    include_role:
+      name: proxmox-templates
+      tasks_from: destroy.yml

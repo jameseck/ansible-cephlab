@@ -1,9 +1,4 @@
 ---
-proxmox_vm_starting_vmid: 600
-default_vm_ssh_user: cloud-user
-default_vm_cpu_count: 2
-default_vm_memory_mb: 4096
-
 # Pick one of the scenarios described in the vm_scenarios dict below
 vm_scenario: compact
 
@@ -51,20 +46,3 @@ vm_scenarios:
     osd1:
       template: template-rhel78
       groups:
-      - osd
-    osd2:
-      template: template-rhel78
-      groups:
-      - osd
-    osd3:
-      template: template-rhel78
-      groups:
-      - osd
-    mds1:
-      template: template-rhel78
-      groups:
-      - mds
-    mds2:
-      template: template-rhel78
-      groups:
-      - mds

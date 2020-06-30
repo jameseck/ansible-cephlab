@@ -37,7 +37,13 @@
     node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
     cores: "{{ cpu_count }}"
-    memory: "{{ memory_size }}"
+    memory: "{{ memory_mb }}"
+    hotplug:
+    - network
+    - disk
+    - cpu
+    - memory
+    - usb
     vmid: "{{ proxmox_template_starting_vmid + index }}"
     net: '{"net0":"virtio,bridge={{ proxmox_network }}"}'
     agent: yes

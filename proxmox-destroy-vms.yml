@@ -1,0 +1,7 @@
+---
+- hosts: proxmox_host
+  tasks:
+  - name: Destroy ceph VMs
+    include_role:
+      name: proxmox-vms
+      tasks_from: destroy.yml

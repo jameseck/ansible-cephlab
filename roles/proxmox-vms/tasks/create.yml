@@ -9,14 +9,14 @@
 # - vm_groups
 # - vm_disks
 # - vm_cpu_count
-# - vm_memory_size
+# - vm_memory_mb
 
-- name: Gather list of VMs
+- name: "{{ vm_name }}: Gather list of VMs"
   shell: pvesh get /cluster/resources -type vm --output-format yaml
   changed_when: false
   register: __vm_list
 
-- name: Filter VM list for templates
+- name: "{{ vm_name }}: Set facts for VMs and templates"
   set_fact:
     vm_list: "{{ __vm_list.stdout | from_yaml }}"
     vm_templates: "{{ (__vm_list.stdout | from_yaml) | selectattr('template', 'equalto', 1) | list }}"
@@ -30,7 +30,7 @@
 #    node: "{{ groups['proxmox_host'][0] }}"
 #    name: "{{ vm_name }}"
 #    #cores: "{{ cpu_count }}"
-#    #memory: "{{ memory_size }}"
+#    #memory: "{{ memory_mb }}"
 #    #net: '{"net0":"virtio,bridge={{ vm_network | default(default_proxmox_network) }}"}'
 #    clone: "{{ vm_template }}"
 #    full: no
@@ -44,14 +44,14 @@
 
 - name: "{{ vm_name }}: Create VM"
   shell: "pvesh create /nodes/{{ groups['proxmox_host'][0] }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ vm_id }} -name {{ vm_name }}"
-  when: "not vm_list | selectattr('id', 'equalto', 'qemu/' + (vm_id|string))"
+  when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (vm_id|string)) | list)"
 
 - name: "{{ vm_name }}: Retrieve VM config"
   shell: pvesh get /nodes/{{ groups['proxmox_host'][0] }}/qemu/{{ vm_id }}/config --output-format yaml
   changed_when: false
   register: __prox_vm_config
 
-- name: set VM config fact
+- name: "{{ vm_name }}: Set VM config fact"
   set_fact:
     __vm_config: "{{ __prox_vm_config.stdout | from_yaml }}"
 
@@ -82,7 +82,7 @@
   - __vm_net is not failed
   - "'ip-addresses' in (__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]"
 
-- name: set fact vm_ips
+- name: "{{ vm_name }}: Set fact vm_ip"
   set_fact:
     vm_ip: "{{ ((__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]['ip-addresses'] | selectattr('ip-address-type', 'equalto', 'ipv4') | list)[0]['ip-address'] }}"
 
@@ -91,7 +91,7 @@
     name: "{{ vm_name }}"
     groups: "{{ vm_groups }}"
     ansible_ssh_host: "{{ vm_ip }}"
-    ansible_ssh_user: cloud-user
+    ansible_ssh_user: "{{ vm_ssh_user }}"
   changed_when: false
 
 - name: groups

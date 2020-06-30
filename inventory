@@ -11,8 +11,8 @@ proxmox_storage=
 
 proxmox_network=vmbr0
 
-cpu_count=2
-memory_size=4096
+vm_cpu_count=2
+vm_memory_mb=4096
 
 # A directory on the proxmox host to store the qcow images before import
 proxmox_template_qcow_storage_dir=

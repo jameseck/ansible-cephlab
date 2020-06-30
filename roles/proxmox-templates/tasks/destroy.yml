@@ -1,0 +1,18 @@
+---
+- name: Destroy VM templates
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    name: "{{ item.key }}"
+    vmid: "{{ proxmox_template_starting_vmid + index }}"
+    state: absent
+  loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
+  register: __delete_status
+
+- name: Show delete status
+  debug:
+    msg: "{{ __delete_status.results | json_query('[].msg') }}"
