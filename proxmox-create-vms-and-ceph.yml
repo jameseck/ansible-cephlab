@@ -1,0 +1,39 @@
+---
+- hosts: proxmox_host
+  roles:
+  - proxmox-vms
+
+- hosts: localhost
+  tasks:
+  - name: Create inventory file for ceph-ansible
+    template:
+      dest: ./ceph-ansible-inventory
+      src: templates/ceph-ansible-inventory.j2
+
+- hosts:
+  - mons
+  - osds
+  - mdss
+  - rgws
+  - nfss
+  - rbdmirrors
+  - clients
+  - iscsigws
+  - iscsi-gws # for backward compatibility only!
+  - mgrs
+  - grafana-server
+  become: yes
+  roles:
+  - ceph-prep
+
+- hosts: mons[0]
+  become: yes
+  tasks:
+  - name: Install ceph-ansible
+    package:
+      name: ceph-ansible
+      state: present
+  - name: Deploy ceph-ansible inventory file
+    copy:
+      src: ./ceph-ansible-inventory
+      dest: /usr/share/ceph-ansible/hosts

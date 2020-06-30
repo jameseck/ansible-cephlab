@@ -5,3 +5,9 @@
 {% endfor %}
 
 {% endfor %}
+
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+rhsm_username={{ rhsm_username }}
+rhsm_password={{ rhsm_password }}

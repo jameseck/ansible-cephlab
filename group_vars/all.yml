@@ -11,8 +11,10 @@ vm_scenarios:
         scsi2: 20
       groups:
       - mons
+      - mgrs
       - osds
       - mdss
+      - grafana-server
     ceph2:
       template: template-rhel78
       disks:
@@ -20,6 +22,7 @@ vm_scenarios:
         scsi2: 20
       groups:
       - mons
+      - mgrs
       - osds
       - mdss
     ceph3:
@@ -29,20 +32,24 @@ vm_scenarios:
         scsi2: 20
       groups:
       - mons
+      - mgrs
       - osds
   full:
     mon1:
       template: template-rhel78
       groups:
       - mons
+      - mgrs
     mon2:
       template: template-rhel78
       groups:
       - mons
+      - mgrs
     mon3:
       template: template-rhel78
       groups:
       - mons
+      - mgrs
     osd1:
       template: template-rhel78
       groups:

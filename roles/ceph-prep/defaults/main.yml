@@ -23,6 +23,9 @@ ceph_repos:
     - rhel-7-server-rhceph-4-tools-rpms
     - rhel-7-server-rhceph-4-mon-rpms
     - rhel-7-server-rhceph-4-osd-rpms
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
     "8":
     - ansible-2.8-for-rhel-8-x86_64-rpms
     - rhceph-4-tools-for-rhel-8-x86_64-rpms
