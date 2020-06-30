@@ -10,39 +10,56 @@ vm_scenarios:
         scsi1: 20
         scsi2: 20
       groups:
-      - mon
-      - osd
-      - mds
+      - mons
+      - osds
+      - mdss
     ceph2:
       template: template-rhel78
       disks:
         scsi1: 20
         scsi2: 20
       groups:
-      - mon
-      - osd
-      - mds
+      - mons
+      - osds
+      - mdss
     ceph3:
       template: template-rhel78
       disks:
         scsi1: 20
         scsi2: 20
       groups:
-      - mon
-      - osd
+      - mons
+      - osds
   full:
     mon1:
       template: template-rhel78
       groups:
-      - mon
+      - mons
     mon2:
       template: template-rhel78
       groups:
-      - mon
+      - mons
     mon3:
       template: template-rhel78
       groups:
-      - mon
+      - mons
     osd1:
       template: template-rhel78
       groups:
+      - osds
+    osd2:
+      template: template-rhel78
+      groups:
+      - osds
+    osd3:
+      template: template-rhel78
+      groups:
+      - osds
+    mds1:
+      template: template-rhel78
+      groups:
+      - mdss
+    mds2:
+      template: template-rhel78
+      groups:
+      - mdss

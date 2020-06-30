@@ -10,21 +10,21 @@
       dest: ./ceph-ansible-inventory
       src: templates/ceph-ansible-inventory.j2
 
-- hosts: mon,osd,mds
+- hosts: mons,osds,mdss
   gather_facts: no
   tasks:
   - name: Wait for SSH
     wait_for_connection:
       timeout: 60
 
-- hosts: mon
+- hosts: mons
   tasks:
   - ping:
 
-- hosts: osd
+- hosts: osds
   tasks:
   - ping:
 
-- hosts: mds
+- hosts: mdss
   tasks:
   - ping:

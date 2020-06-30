@@ -90,8 +90,8 @@
   add_host:
     name: "{{ vm_name }}"
     groups: "{{ vm_groups }}"
-    ansible_ssh_host: "{{ vm_ip }}"
-    ansible_ssh_user: "{{ vm_ssh_user }}"
+    ansible_host: "{{ vm_ip }}"
+    ansible_user: "{{ vm_ssh_user }}"
   changed_when: false
 
 - name: groups

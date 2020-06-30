@@ -23,3 +23,8 @@ qcow_local_image_source_dir=
 # An ssh key to configure for templates and vm's
 # Should be a string in the format "ssh-rsa <blob>"
 admin_ssh_key=
+
+[all:vars]
+
+rhsm_username=
+rhsm_password=
