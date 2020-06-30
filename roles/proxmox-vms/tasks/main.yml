@@ -16,16 +16,3 @@
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
-
-
-
-# - vm_name
-# - vm_id
-# - vm_network
-# - vm_template
-# - vm_storage
-# - vm_groups
-# - vm_disks
-# - vm_cpu_count
-# - vm_memory_size
-
