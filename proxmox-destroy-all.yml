@@ -11,3 +11,7 @@
     include_role:
       name: proxmox-templates
       tasks_from: destroy.yml
+  - name: Destroy ceph VMs
+    include_role:
+      name: proxmox-vms
+      tasks_from: destroy.yml

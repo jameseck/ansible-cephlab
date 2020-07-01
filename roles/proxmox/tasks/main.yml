@@ -1,0 +1,5 @@
+---
+- name: "Ensure required packages {{ proxmox_packages | join(',') }} are installed on the Proxmox host"
+  package:
+    name: "{{ proxmox_packages }}"
+    state: present

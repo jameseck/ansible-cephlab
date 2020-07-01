@@ -1,24 +1,38 @@
 ---
 - name: Stop running VMs
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"
     state: stopped
   ignore_errors: yes
+  async: 600
+  poll: 0
+  register: __prox_shutdown_vms
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
 
+- name: Check on "Stop running VMs" task
+  async_status:
+    jid: "{{ async_result_item.ansible_job_id }}"
+  loop: "{{ __prox_shutdown_vms.results }}"
+  loop_control:
+    loop_var: async_result_item
+  until: job_result.finished
+  retries: 60
+  delay: 5
+  register: job_result
+
 - name: Poll VM status
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"
     state: current

@@ -31,10 +31,10 @@
 
 - name: Create VM templates
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
     cores: "{{ item.value.cpu_count | default(default_vm_cpu_count) }}"
     memory: "{{ item.value.memory_mb | default(default_vm_memory_mb) }}"
@@ -50,10 +50,10 @@
 
 - name: Check VM template state
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
     state: current
   loop: "{{ proxmox_templates | dict2items }}"

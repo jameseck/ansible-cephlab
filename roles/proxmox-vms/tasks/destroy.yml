@@ -1,27 +1,13 @@
 ---
 - name: Stop running VMs
-  import_task: shutdown.yml
-
-#- name: Stop running VMs
-#  proxmox_kvm:
-#    api_user: "{{ proxmox_user }}"
-#    api_password: "{{ proxmox_password }}"
-#    api_host: "{{ groups['proxmox_host'][0] }}"
-#    node: "{{ groups['proxmox_host'][0] }}"
-#    vmid: "{{ proxmox_vm_starting_vmid + index }}"
-#    name: "{{ item.key }}"
-#    state: stopped
-#  ignore_errors: yes
-#  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-#  loop_control:
-#    index_var: index
+  include_tasks: shutdown.yml
 
 - name: delete VM
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"
     state: absent

@@ -1,32 +1,30 @@
 ---
-# Variables:
-# - vm_name
-# - vm_id
-# - vm_network
-# - vm_template
-# - vm_storage
-# - vm_groups
-# - vm_disks
-# - vm_cpu_count
-# - vm_memory_mb
-
 - name: "{{ vm_name }}: Gather list of VMs"
   shell: pvesh get /cluster/resources -type vm --output-format yaml
   changed_when: false
   register: __vm_list
+
+- name: dbg
+  debug:
+    msg: "{{ __vm_list | from_yaml }}"
 
 - name: "{{ vm_name }}: Set facts for VMs and templates"
   set_fact:
     vm_list: "{{ __vm_list.stdout | from_yaml }}"
     vm_templates: "{{ (__vm_list.stdout | from_yaml) | selectattr('template', 'equalto', 1) | list }}"
 
+- name: "{{ vm_name }}: Fail if template does not exist"
+  fail:
+    msg: "Template '{{ vm_template }}' does not exist"
+  when: "not (vm_templates | selectattr('name', 'equalto', vm_template)) | list"
+
 # NOTE: Due to bugs with proxmox_kvm, creating linked clones does not seem to work so we're using pvesh below instead
 #- name: "{{ vm_name }}: Create VM"
 #  proxmox_kvm:
-#    api_user: "{{ proxmox_user }}"
-#    api_password: "{{ proxmox_password }}"
-#    api_host: "{{ groups['proxmox_host'][0] }}"
-#    node: "{{ groups['proxmox_host'][0] }}"
+#    #api_user: "{{ proxmox_user }}"
+#    #api_password: "{{ proxmox_password }}"
+#    #api_host: "{{ groups['proxmox_host'][0] }}"
+#    #node: "{{ groups['proxmox_host'][0] }}"
 #    name: "{{ vm_name }}"
 #    #cores: "{{ cpu_count }}"
 #    #memory: "{{ memory_mb }}"
@@ -42,11 +40,11 @@
 #    timeout: 500
 
 - name: "{{ vm_name }}: Create VM"
-  shell: "pvesh create /nodes/{{ groups['proxmox_host'][0] }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ vm_id }} -name {{ vm_name }}"
+  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ vm_id }} -name {{ vm_name }}"
   when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (vm_id|string)) | list)"
 
 - name: "{{ vm_name }}: Retrieve VM config"
-  shell: pvesh get /nodes/{{ groups['proxmox_host'][0] }}/qemu/{{ vm_id }}/config --output-format yaml
+  shell: pvesh get /nodes/{{ proxmox_host }}/qemu/{{ vm_id }}/config --output-format yaml
   changed_when: false
   register: __prox_vm_config
 
@@ -55,56 +53,23 @@
     __vm_config: "{{ __prox_vm_config.stdout | from_yaml }}"
 
 - name: "{{ vm_name }}: Create additional VM disks"
-  shell: "pvesh create /nodes/{{ groups['proxmox_host'][0] }}/qemu/{{ vm_id }}/config -{{ itm.key }} {{ vm_storage }}:{{ itm.value }}"
+  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ vm_id }}/config -{{ itm.key }} {{ vm_storage }}:{{ itm.value }}"
   when: itm.key not in __vm_config
   loop: "{{ vm_disks | dict2items }}"
   loop_control:
     index_var: idx
     loop_var: itm
 
+# This crap ALWAYS reports updated even when nothing changes at all
 - name: "{{ vm_name }}: Update VM config"
   proxmox_kvm:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
+    #api_user: "{{ proxmox_user }}"
+    #api_password: "{{ proxmox_password }}"
+    #api_host: "{{ groups['proxmox_host'][0] }}"
+    #node: "{{ groups['proxmox_host'][0] }}"
     vmid: "{{ vm_id }}"
+    name: "{{ vm_name }}"
     memory: "{{ memory_mb }}"
     cores: "{{ cpu_count }}"
     update: yes
-
-#- name: "{{ vm_name }}: Ensure the VM is started"
-#  proxmox_kvm:
-#    api_user: "{{ proxmox_user }}"
-#    api_password: "{{ proxmox_password }}"
-#    api_host: "{{ groups['proxmox_host'][0] }}"
-#    node: "{{ groups['proxmox_host'][0] }}"
-#    vmid: "{{ vm_id }}"
-#    state: started
-#
-#- name: "{{ vm_name }}: Get eth0 network info from VM (wait until eth0 is up)"
-#  shell: "qm guest cmd {{ vm_id }} network-get-interfaces"
-#  changed_when: false
-#  retries: 20
-#  delay: 2
-#  register: __vm_net
-#  until:
-#  - __vm_net is not failed
-#  - "'ip-addresses' in (__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]"
-#
-#- name: "{{ vm_name }}: Set fact vm_ip"
-#  set_fact:
-#    vm_ip: "{{ ((__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]['ip-addresses'] | selectattr('ip-address-type', 'equalto', 'ipv4') | list)[0]['ip-address'] }}"
-#
-## REF: https://www.jeffgeerling.com/blog/2017/adding-strings-array-ansible to work out how to append to a list
-#- name: "{{ vm_name }}: Append vm to vm_details"
-#  set_fact:
-#    vm_details: "{{ vm_details }} + [ '{{ vm_name }} - {{ vm_ip }}' ]"
-#
-#- name: "{{ vm_name }}: add host to inventory"
-#  add_host:
-#    name: "{{ vm_name }}"
-#    groups: "{{ vm_groups }}"
-#    ansible_host: "{{ vm_ip }}"
-#    ansible_user: "{{ vm_ssh_user }}"
-#  changed_when: false
+  changed_when: false
