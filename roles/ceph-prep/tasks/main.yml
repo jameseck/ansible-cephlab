@@ -19,3 +19,14 @@
   yum:
     name: "*"
     state: latest
+
+- name: Check if reboot is required
+  shell: needs-restarting -r
+  failed_when: false
+  register: reboot_required
+  changed_when: false
+
+- name: Reboot if required
+  reboot:
+    reboot_timeout: 3600
+  when: reboot_required.rc != 0
