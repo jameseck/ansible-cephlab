@@ -1,17 +1,4 @@
 ---
-- name: Install proxmoxer on proxmox host
-  package:
-    name: python-proxmoxer
-    state: present
-
-- name: Deploy ssh key file to proxmox host
-  copy:
-    dest: /tmp/admin_ssh_key
-    content: "{{ admin_ssh_key }}"
-    owner: root
-    group: root
-    mode: 0600
-
 - name: Ensure qcow storage dir exists
   file:
     path: "{{ proxmox_template_qcow_storage_dir }}"
@@ -31,10 +18,6 @@
 
 - name: Create VM templates
   proxmox_kvm:
-    #api_user: "{{ proxmox_user }}"
-    #api_password: "{{ proxmox_password }}"
-    #api_host: "{{ groups['proxmox_host'][0] }}"
-    #node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
     cores: "{{ item.value.cpu_count | default(default_vm_cpu_count) }}"
     memory: "{{ item.value.memory_mb | default(default_vm_memory_mb) }}"
@@ -50,10 +33,6 @@
 
 - name: Check VM template state
   proxmox_kvm:
-    #api_user: "{{ proxmox_user }}"
-    #api_password: "{{ proxmox_password }}"
-    #api_host: "{{ groups['proxmox_host'][0] }}"
-    #node: "{{ groups['proxmox_host'][0] }}"
     name: "{{ item.key }}"
     state: current
   loop: "{{ proxmox_templates | dict2items }}"
@@ -74,6 +53,14 @@
 - name: prox_template_info
   debug:
     var: __prox_template_info
+
+- name: Deploy ssh key file to proxmox host
+  copy:
+    dest: /tmp/admin_ssh_key
+    content: "{{ admin_ssh_key }}"
+    owner: root
+    group: root
+    mode: 0600
 
 - name: Configure templates
   shell: |

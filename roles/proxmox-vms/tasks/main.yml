@@ -1,4 +1,5 @@
 ---
+# TODO: We should rewrite this so it can handle creating VMs in parallel
 - name: Create VMs
   include_tasks: create.yml
   vars:
@@ -15,6 +16,7 @@
   loop_control:
     index_var: index
 
+# TODO: We should rewrite this so it can handle starting VMs in parallel
 - name: Start VMs
   include_tasks: start.yml
   vars:

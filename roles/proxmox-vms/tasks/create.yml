@@ -21,10 +21,6 @@
 # NOTE: Due to bugs with proxmox_kvm, creating linked clones does not seem to work so we're using pvesh below instead
 #- name: "{{ vm_name }}: Create VM"
 #  proxmox_kvm:
-#    #api_user: "{{ proxmox_user }}"
-#    #api_password: "{{ proxmox_password }}"
-#    #api_host: "{{ groups['proxmox_host'][0] }}"
-#    #node: "{{ groups['proxmox_host'][0] }}"
 #    name: "{{ vm_name }}"
 #    #cores: "{{ cpu_count }}"
 #    #memory: "{{ memory_mb }}"
@@ -63,10 +59,6 @@
 # This crap ALWAYS reports updated even when nothing changes at all
 - name: "{{ vm_name }}: Update VM config"
   proxmox_kvm:
-    #api_user: "{{ proxmox_user }}"
-    #api_password: "{{ proxmox_password }}"
-    #api_host: "{{ groups['proxmox_host'][0] }}"
-    #node: "{{ groups['proxmox_host'][0] }}"
     vmid: "{{ vm_id }}"
     name: "{{ vm_name }}"
     memory: "{{ memory_mb }}"
