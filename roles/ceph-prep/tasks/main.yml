@@ -14,3 +14,8 @@
 - name: Enable rhsm repositories
   rhsm_repository:
     name: "{{ (ceph_repos[ceph_release | default(default_ceph_release)][ansible_distribution_major_version]) | join(',') }}"
+
+- name: Update packages
+  yum:
+    name: "*"
+    state: latest
