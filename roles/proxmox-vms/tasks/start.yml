@@ -1,0 +1,36 @@
+---
+- name: "{{ vm_name }}: Ensure the VM is started"
+  proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
+    vmid: "{{ vm_id }}"
+    state: started
+
+- name: "{{ vm_name }}: Get eth0 network info from VM (wait until eth0 is up)"
+  shell: "qm guest cmd {{ vm_id }} network-get-interfaces"
+  changed_when: false
+  retries: 20
+  delay: 2
+  register: __vm_net
+  until:
+  - __vm_net is not failed
+  - "'ip-addresses' in (__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]"
+
+- name: "{{ vm_name }}: Set fact vm_ip"
+  set_fact:
+    vm_ip: "{{ ((__vm_net.stdout | from_json | selectattr('name', 'equalto', 'eth0') | list)[0]['ip-addresses'] | selectattr('ip-address-type', 'equalto', 'ipv4') | list)[0]['ip-address'] }}"
+
+# REF: https://www.jeffgeerling.com/blog/2017/adding-strings-array-ansible to work out how to append to a list
+- name: "{{ vm_name }}: Append vm to vm_details"
+  set_fact:
+    vm_details: "{{ vm_details }} + [ '{{ vm_name }} - {{ vm_ip }}' ]"
+
+- name: "{{ vm_name }}: add host to inventory"
+  add_host:
+    name: "{{ vm_name }}"
+    groups: "{{ vm_groups }}"
+    ansible_host: "{{ vm_ip }}"
+    ansible_user: "{{ vm_ssh_user }}"
+  changed_when: false

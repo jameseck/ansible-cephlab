@@ -3,12 +3,14 @@
   roles:
   - proxmox-vms
 
-- hosts: localhost
+- hosts: proxmox_host
+  gather_facts: no
   tasks:
-  - name: Create inventory file for ceph-ansible
-    template:
-      dest: ./ceph-ansible-inventory
-      src: templates/ceph-ansible-inventory.j2
+  - name: Show ceph VM info
+    debug:
+      var: vm_details
+  - pause:
+      seconds: 10
 
 - hosts:
   - mons
@@ -29,11 +31,7 @@
 - hosts: mons[0]
   become: yes
   tasks:
-  - name: Install ceph-ansible
-    package:
-      name: ceph-ansible
-      state: present
-  - name: Deploy ceph-ansible inventory file
-    copy:
-      src: ./ceph-ansible-inventory
-      dest: /usr/share/ceph-ansible/hosts
+  - name: Deploy ceph-ansible
+    include_role:
+      name: ceph-prep
+      tasks_from: ansible.yml

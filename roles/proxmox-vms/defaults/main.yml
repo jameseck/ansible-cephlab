@@ -3,3 +3,4 @@ proxmox_vm_starting_vmid: 600
 default_vm_ssh_user: cloud-user
 default_vm_cpu_count: 2
 default_vm_memory_mb: 4096
+vm_details: [] # Only used for reporting - should be left empty

@@ -1,5 +1,4 @@
 ---
-
 - name: Create VMs
   include_tasks: create.yml
   vars:
@@ -8,11 +7,21 @@
     vm_network: "{{ item.value.network | default(proxmox_network) }}"
     vm_template: "{{ item.value.template }}"
     vm_storage: "{{ item.value.storage | default(proxmox_storage) }}"
+    cpu_count: "{{ item.value.cpu_count | default(vm_cpu_count) | default(default_vm_cpu_count) }}"
+    memory_mb: "{{ item.value.memory_mb | default(vm_memory_mb) | default(default_vm_memory_mb) }}"
+    vm_disks: "{{ item.value.disks | default({}) }}"
+
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop_control:
+    index_var: index
+
+- name: Start VMs
+  include_tasks: start.yml
+  vars:
+    vm_name: "{{ item.key }}"
+    vm_id: "{{ proxmox_vm_starting_vmid + index }}"
     vm_groups: "{{ item.value.groups }}"
     vm_ssh_user: "{{ item.value.ssh_user | default(default_vm_ssh_user) }}"
-    cpu_count: "{{ item.value.cpu_count | default(default_vm_cpu_count) }}"
-    memory_mb: "{{ item.value.memory_mb | default(default_vm_memory_mb) }}"
-    vm_disks: "{{ item.value.disks | default({}) }}"
 
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:

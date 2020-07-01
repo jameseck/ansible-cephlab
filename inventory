@@ -1,14 +1,16 @@
 [proxmox_host]
 proxmox1 ansible_host=<IP_OR_FQDN> ansible_user=root
 
+
 [proxmox_host:vars]
 
 proxmox_user=root@pam
 proxmox_password=
 
-# The proxmox storage pool to use for templates and vms
+# The proxmox storage pool to use for templates and VMs
 proxmox_storage=
 
+# The proxmox network to be used by the VMs
 proxmox_network=vmbr0
 
 vm_cpu_count=2
@@ -20,11 +22,13 @@ proxmox_template_qcow_storage_dir=
 # A directory on the local host (running ansible) which contains the qcow images described in roles/proxmox-templates/defaults/main.yml
 qcow_local_image_source_dir=
 
-# An ssh key to configure for templates and vm's
+# An ssh key to configure for templates and VMs
 # Should be a string in the format "ssh-rsa <blob>"
 admin_ssh_key=
 
 [all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
+# Since we are building RHEL VM's, we'll need a way to register the servers with RHSM
 rhsm_username=
 rhsm_password=
