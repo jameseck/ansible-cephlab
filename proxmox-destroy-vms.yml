@@ -7,6 +7,10 @@
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
   tasks:
+  - name: Remove ceph RHSM subscriptions
+    include_role:
+      name: ceph-prep
+      tasks_from: destroy.yml
   - name: Destroy ceph VMs
     include_role:
       name: proxmox-vms

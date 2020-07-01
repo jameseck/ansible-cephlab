@@ -11,6 +11,10 @@
     include_role:
       name: proxmox-templates
       tasks_from: destroy.yml
+  - name: Remove ceph RHSM subscriptions
+    include_role:
+      name: ceph-prep
+      tasks_from: destroy.yml
   - name: Destroy ceph VMs
     include_role:
       name: proxmox-vms
