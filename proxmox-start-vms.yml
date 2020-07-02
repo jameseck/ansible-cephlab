@@ -7,7 +7,7 @@
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
   tasks:
-  - name: Start ceph VM's
+  - name: Start ceph VMs
     include_role:
       name: proxmox-vms
       tasks_from: start.yml

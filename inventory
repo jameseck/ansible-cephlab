@@ -27,8 +27,6 @@ qcow_local_image_source_dir=
 admin_ssh_key=
 
 [all:vars]
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-
 # Since we are building RHEL VM's, we'll need a way to register the servers with RHSM
 rhsm_username=
 rhsm_password=

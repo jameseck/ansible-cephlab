@@ -38,13 +38,16 @@
   - mgrs
   - grafana-server
   become: yes
-  roles:
-  - ceph-prep
+  tasks:
+  - name: Prep ceph VMs
+    include_role:
+      name: ceph
+      tasks_from: prep.yml
 
 - hosts: mons[0]
   become: yes
   tasks:
   - name: Deploy ceph-ansible
     include_role:
-      name: ceph-prep
-      tasks_from: ansible.yml
+      name: ceph
+      tasks_from: prep_ansible.yml

@@ -13,7 +13,7 @@
       tasks_from: destroy.yml
   - name: Remove ceph RHSM subscriptions
     include_role:
-      name: ceph-prep
+      name: ceph
       tasks_from: destroy.yml
   - name: Destroy ceph VMs
     include_role:

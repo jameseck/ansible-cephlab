@@ -1,0 +1,32 @@
+---
+- name: Install ceph-ansible
+  package:
+    name: ceph-ansible
+    state: present
+- name: Deploy ceph-ansible inventory file
+  template:
+    dest: /usr/share/ceph-ansible/hosts
+    src: templates/ceph-ansible-inventory.j2
+
+- name: Seed site.yml containerized
+  copy:
+    src: /usr/share/ceph-ansible/site-container.yml.sample
+    dest: /usr/share/ceph-ansible/site.yml
+    remote_src: yes
+    force: no
+
+- name: Seed group_vars files from sample files
+  copy:
+    src: "/usr/share/ceph-ansible/group_vars/{{ item.name }}.sample"
+    dest: "/usr/share/ceph-ansible/group_vars/{{ item.name }}"
+    remote_src: yes
+    force: no
+  loop: "{{ ceph_ansible_group_vars_changes }}"
+
+- name: Modify group_vars files
+  lineinfile:
+    path: "/usr/share/ceph-ansible/group_vars/{{ item.0.name }}"
+    regexp: "{{ item.1.regexp }}"
+    line: "{{ item.1.line }}"
+    state: present
+  loop: "{{ ceph_ansible_group_vars_changes | subelements('changes') }}"

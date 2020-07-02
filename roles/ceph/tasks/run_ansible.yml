@@ -1,0 +1,24 @@
+---
+- name: Run ceph-ansible (You can check ~/ansible/ansible.log for details)
+  shell: ansible-playbook -i hosts site.yml
+  args:
+    chdir: /usr/share/ceph-ansible
+  register: __ceph_ansible
+  async: 1200
+  poll: 0
+
+- name: Check on ceph-ansible task
+  async_status:
+    jid: "{{ __ceph_ansible.ansible_job_id }}"
+  until: job_result.finished
+  retries: 120
+  delay: 10
+  register: job_result
+
+- name: Show ceph-ansible output
+  debug:
+    var: __ceph_ansible
+
+- name: Report ceph health
+  shell: ceph -s
+  become: yes
