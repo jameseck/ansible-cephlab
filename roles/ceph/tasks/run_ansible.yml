@@ -7,13 +7,13 @@
   async: 1200
   poll: 0
 
-- name: Check on ceph-ansible task
+- name: Check on ceph-ansible task (this task may take a very long time to complete)
   async_status:
     jid: "{{ __ceph_ansible.ansible_job_id }}"
-  until: job_result.finished
+  until: __job_result.finished
   retries: 120
   delay: 10
-  register: job_result
+  register: __job_result
 
 - name: Show ceph-ansible output
   debug:
@@ -21,4 +21,9 @@
 
 - name: Report ceph health
   shell: ceph -s
+  register: __ceph_health
   become: yes
+
+- name: Show ceph health
+  debug:
+    var: __ceph_health.stdout
