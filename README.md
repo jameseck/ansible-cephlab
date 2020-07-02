@@ -29,6 +29,12 @@ These image files need to be on the host running this ansible code - specify the
 
 It is planned to download these directly from RH but this hasn't yet been implemented.
 
+For now, you can download them from:
+
+https://access.redhat.com/downloads/content/69/ver=/rhel---7/7.8/x86_64/product-software
+https://access.redhat.com/downloads/content/479/ver=/rhel---8/8.2/x86_64/product-software
+
+
 Modify the inventory file accordingly - placeholders are defined for variables that you will need to set
 Run:
 ```

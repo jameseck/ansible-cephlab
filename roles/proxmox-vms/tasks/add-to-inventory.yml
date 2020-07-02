@@ -6,7 +6,9 @@
   retries: 20
   delay: 2
   register: __vm_net
-  until: __vm_net is not failed
+  until:
+  - __vm_net is not failed
+  - __vm_net.stdout
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index

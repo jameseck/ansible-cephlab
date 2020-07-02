@@ -19,11 +19,14 @@
 # TODO: We should rewrite this so it can handle starting VMs in parallel
 - name: Start VMs
   include_tasks: start.yml
-  vars:
-    vm_name: "{{ item.key }}"
-    vm_id: "{{ proxmox_vm_starting_vmid + index }}"
-    vm_groups: "{{ item.value.groups }}"
-    vm_ssh_user: "{{ item.value.ssh_user | default(default_vm_ssh_user) }}"
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-  loop_control:
-    index_var: index
+#  vars:
+#    vm_name: "{{ item.key }}"
+#    vm_id: "{{ proxmox_vm_starting_vmid + index }}"
+#    vm_groups: "{{ item.value.groups }}"
+#    vm_ssh_user: "{{ item.value.ssh_user | default(default_vm_ssh_user) }}"
+#  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+#  loop_control:
+#    index_var: index
+
+- name: Add VMs to inventory
+  include_tasks: add-to-inventory.yml

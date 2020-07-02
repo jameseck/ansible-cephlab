@@ -29,7 +29,7 @@
   loop: "{{ proxmox_templates | dict2items }}"
   loop_control:
     index_var: index
-  register: __vm_dump
+  register: __vm_dump # TODO: Do we need this?
 
 - name: Check VM template state
   proxmox_kvm:
@@ -38,21 +38,8 @@
   loop: "{{ proxmox_templates | dict2items }}"
   retries: 10
   delay: 2
-  until: __vm_dump is not failed
-  register: __vm_dump
-
-- name: Check if templates exist
-  shell: qm status {{ proxmox_template_starting_vmid + index }}
-  ignore_errors: yes
-  changed_when: false
-  register: __prox_template_info
-  loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
-
-- name: prox_template_info
-  debug:
-    var: __prox_template_info
+  until: __prox_template_dump is not failed
+  register: __prox_template_dump
 
 - name: Deploy ssh key file to proxmox host
   copy:
@@ -74,7 +61,7 @@
     qm set {{ proxmox_template_starting_vmid + index }} --numa 1
     qm template {{ proxmox_template_starting_vmid + index }}
     touch "/tmp/{{ proxmox_template_starting_vmid + index }}_template_provisioned"
-  when: __prox_template_info.results[index] is not failed
+  when: __prox_template_dump.results[index] is failed
   async: 600
   poll: 0
   register: __prox_configure_templates
@@ -88,7 +75,9 @@
   loop: "{{ __prox_configure_templates.results }}"
   loop_control:
     loop_var: async_result_item
+    index_var: index
   register: __job_result
+  when: __prox_configure_templates.results[index] is not skipped
   until: __job_result.finished
   retries: 60
   delay: 5

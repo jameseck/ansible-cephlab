@@ -4,6 +4,7 @@
   args:
     chdir: /usr/share/ceph-ansible
   register: __ceph_ansible
+  failed_when: false
   async: 1200
   poll: 0
 
@@ -17,7 +18,8 @@
 
 - name: Show ceph-ansible output
   debug:
-    var: __ceph_ansible
+    msg: "{{ item }}"
+  loop: "{{ __ceph_ansible.stdout.lines }}"
 
 - name: Report ceph health
   shell: ceph -s
@@ -26,4 +28,4 @@
 
 - name: Show ceph health
   debug:
-    var: __ceph_health.stdout
+    var: "{{ __ceph_health.stdout }}"
