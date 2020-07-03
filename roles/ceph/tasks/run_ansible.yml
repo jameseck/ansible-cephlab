@@ -1,5 +1,5 @@
 ---
-- name: "Run ceph-ansible (You can check /home/{{ ansible_ssh_user }}/ansible/ansible.log for details)"
+- name: Run ceph-ansible (You can check ~/ansible/ansible.log for details)
   shell: ansible-playbook -i hosts site.yml
   args:
     chdir: /usr/share/ceph-ansible
@@ -24,7 +24,7 @@
 - name: Show last 20 lines of ceph-ansible output
   debug:
     msg: "{{ item }}"
-    loop: "{{ __job_result.stdout_lines[-20:] }}"
+  loop: "{{ __job_result.stdout_lines[-20:] }}"
 
 - name: Report ceph health
   shell: ceph -s -f json

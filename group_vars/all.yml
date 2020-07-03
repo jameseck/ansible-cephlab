@@ -1,11 +1,12 @@
 ---
 # Pick one of the scenarios described in the vm_scenarios dict below
 vm_scenario: compact
+vm_default_template: template-rhel78
 
 vm_scenarios:
   compact:
     ceph1:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       disks:
         scsi1: 20
         scsi2: 20
@@ -17,7 +18,7 @@ vm_scenarios:
       - grafana-server
       - clients
     ceph2:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       disks:
         scsi1: 20
         scsi2: 20
@@ -27,7 +28,7 @@ vm_scenarios:
       - osds
       - mdss
     ceph3:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       disks:
         scsi1: 20
         scsi2: 20
@@ -37,40 +38,40 @@ vm_scenarios:
       - osds
   full:
     mon1:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - mons
       - mgrs
       - grafana-server
       - clients
     mon2:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - mons
       - mgrs
     mon3:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - mons
       - mgrs
     osd1:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - osds
     osd2:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - osds
     osd3:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - osds
     mds1:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - mdss
     mds2:
-      template: template-rhel78
+      template: "{{ vm_default_template }}"
       groups:
       - mdss
 
@@ -85,13 +86,13 @@ ceph_ansible_group_vars_changes:
     line: 'ceph_origin: distro'
   - regexp: '^#monitor_interface: interface'
     line: 'monitor_interface: eth0'
+  - regexp: '^containerized_deployment: False'
+    line: 'containerized_deployment: True'
   - regexp: '^#ceph_docker_registry_username:'
     line: !unsafe "ceph_docker_registry_username: \"{{ '{{' }} rhsm_username {{ '}}' }}\""
   - regexp: '^#ceph_docker_registry_password:'
     line: !unsafe "ceph_docker_registry_password: \"{{ '{{' }} rhsm_password {{ '}}' }}\""
-  - regexp: '^containerized_deployment: False'
-    line: 'containerized_deployment: True'
   - regexp: '^#dashboard_admin_password:'
-    line: 'dashboard_admin_password: p@ssw0rd'
+    line: !unsafe "dashboard_admin_password: \"{{ '{{' }} ceph_dashboard_admin_password {{ '}}' }}\""
   - regexp: '^#grafana_admin_password:'
-    line: 'grafana_admin_password: p@ssw0rd'
+    line: !unsafe "grafana_admin_password: \"{{ '{{' }} ceph_grafana_admin_password {{ '}}' }}\""

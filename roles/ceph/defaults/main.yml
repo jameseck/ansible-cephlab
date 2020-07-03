@@ -18,6 +18,9 @@ default_ceph_release: rhcs4
 
 default_vm_timezone: Europe/London
 
+ceph_dashboard_admin_password: p@ssw0rd
+ceph_grafana_admin_password: p@ssw0rd
+
 ceph_repos:
   rhcs4:
     "7":
