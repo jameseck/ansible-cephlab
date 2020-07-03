@@ -11,7 +11,7 @@
   - name: Add VMs to inventory
     include_role:
       name: proxmox-vms
-      tasks_from: add-to-inventory.yml
+      tasks_from: add_to_inventory.yml
   - name: Show ceph VM info
     debug:
       var: vm_details

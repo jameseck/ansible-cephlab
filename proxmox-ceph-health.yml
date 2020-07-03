@@ -1,0 +1,21 @@
+---
+- hosts: proxmox_host
+  module_defaults:
+    proxmox_kvm:
+      api_user: "{{ proxmox_user }}"
+      api_password: "{{ proxmox_password }}"
+      api_host: "{{ groups['proxmox_host'][0] }}"
+      node: "{{ groups['proxmox_host'][0] }}"
+  tasks:
+  - name: Add ceph VMs to inventory
+    include_role:
+      name: proxmox-vms
+      tasks_from: add_to_inventory.yml
+
+- hosts: mons[0]
+  become: no
+  tasks:
+  - name: Show ceph health
+    include_role:
+      name: ceph
+      tasks_from: get_health.yml

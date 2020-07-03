@@ -10,7 +10,7 @@
   - name: Add ceph VMs to inventory
     include_role:
       name: proxmox-vms
-      tasks_from: add-to-inventory.yml
+      tasks_from: add_to_inventory.yml
 
 - hosts:
   - mons

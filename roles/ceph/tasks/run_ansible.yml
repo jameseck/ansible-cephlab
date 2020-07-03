@@ -19,18 +19,18 @@
 
 - name: dbg
   debug:
-    var: __ceph_ansible
+    var: __job_result
 
-- name: Show ceph-ansible output
+- name: Show last 20 lines of ceph-ansible output
   debug:
     msg: "{{ item }}"
-  loop: "{{ __ceph_ansible.stdout_lines }}"
+    loop: "{{ __job_result.stdout_lines[-20:] }}"
 
 - name: Report ceph health
-  shell: ceph -s
+  shell: ceph -s -f json
   register: __ceph_health
   become: yes
 
 - name: Show ceph health
   debug:
-    var: "{{ __ceph_health.stdout }}"
+    msg: "{{ (__ceph_health.stdout | from_json).health }}"

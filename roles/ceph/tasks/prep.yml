@@ -1,7 +1,11 @@
 ---
-- name: set hostname
+- name: Set hostname
   hostname:
     name: "{{ inventory_hostname }}"
+
+- name: Set timezone
+  timezone:
+    name: "{{ vm_timezone | default(default_vm_timezone) }}"
 
 - name: Register system with rhsm
   redhat_subscription:

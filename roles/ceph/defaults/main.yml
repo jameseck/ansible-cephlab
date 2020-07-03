@@ -16,6 +16,8 @@
 #  - grafana-server
 default_ceph_release: rhcs4
 
+default_vm_timezone: Europe/London
+
 ceph_repos:
   rhcs4:
     "7":

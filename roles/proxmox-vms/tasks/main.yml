@@ -29,4 +29,4 @@
 #    index_var: index
 
 - name: Add VMs to inventory
-  include_tasks: add-to-inventory.yml
+  include_tasks: add_to_inventory.yml

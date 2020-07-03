@@ -1,0 +1,9 @@
+---
+- name: Report ceph health
+  shell: ceph -s -f json
+  register: __ceph_health
+  become: yes
+
+- name: Show ceph health
+  debug:
+    msg: "{{ (__ceph_health.stdout | from_json).health }}"
