@@ -3,6 +3,7 @@
   package:
     name: ceph-ansible
     state: present
+
 - name: Deploy ceph-ansible inventory file
   template:
     dest: /usr/share/ceph-ansible/hosts

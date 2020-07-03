@@ -44,24 +44,3 @@
     include_role:
       name: ceph
       tasks_from: run_ansible.yml
-
-#- hosts: mons[0]
-#  become: no
-#  tasks:
-#  - name: Run ceph-ansible (You can check ~/ansible/ansible.log for details)
-#    shell: ansible-playbook -i hosts site.yml
-#    args:
-#      chdir: /usr/share/ceph-ansible
-#    register: __ceph_ansible
-#    async: 600
-#    poll: 0
-#  - name: Check on ceph-ansible task
-#    async_status:
-#      jid: "{{ __ceph_ansible.ansible_job_id }}"
-#    until: job_result.finished
-#    retries: 120
-#    delay: 10
-#    register: job_result
-#  - name: Report ceph health
-#    shell: ceph -s
-#    become: yes

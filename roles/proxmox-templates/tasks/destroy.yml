@@ -9,6 +9,6 @@
     index_var: index
   register: __delete_status
 
-- name: Show delete status
+- name: Show VM template delete status
   debug:
     msg: "{{ __delete_status.results | json_query('[].msg') }}"
