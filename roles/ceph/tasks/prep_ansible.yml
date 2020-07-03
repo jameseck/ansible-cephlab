@@ -8,6 +8,14 @@
     dest: /usr/share/ceph-ansible/hosts
     src: templates/ceph-ansible-inventory.j2
 
+- name: Create ansible directory
+  file:
+    path: "/home/{{ ansible_ssh_user }}/ansible"
+    state: directory
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0755
+
 - name: Seed site.yml containerized
   copy:
     src: /usr/share/ceph-ansible/site-container.yml.sample

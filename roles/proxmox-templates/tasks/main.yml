@@ -16,7 +16,15 @@
     mode: 0644
   loop: "{{ proxmox_templates | dict2items }}"
 
-- name: Create VM templates
+- name: Deploy ssh key file to proxmox host
+  copy:
+    dest: /tmp/admin_ssh_key
+    content: "{{ admin_ssh_key }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Create template VMs
   proxmox_kvm:
     name: "{{ item.key }}"
     cores: "{{ item.value.cpu_count | default(default_vm_cpu_count) }}"
@@ -29,25 +37,21 @@
   loop: "{{ proxmox_templates | dict2items }}"
   loop_control:
     index_var: index
-  register: __vm_dump # TODO: Do we need this?
+  register: __prox_template_create
 
-- name: Check VM template state
+- name: Wait for template VMs creation
   proxmox_kvm:
     name: "{{ item.key }}"
     state: current
   loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
   retries: 10
   delay: 2
-  until: __prox_template_dump is not failed
-  register: __prox_template_dump
-
-- name: Deploy ssh key file to proxmox host
-  copy:
-    dest: /tmp/admin_ssh_key
-    content: "{{ admin_ssh_key }}"
-    owner: root
-    group: root
-    mode: 0600
+  until:
+  - __prox_template_create_check is not failed
+  - __prox_template_create_check.status == 'stopped'
+  register: __prox_template_create_check
 
 - name: Configure templates
   shell: |
@@ -61,7 +65,7 @@
     qm set {{ proxmox_template_starting_vmid + index }} --numa 1
     qm template {{ proxmox_template_starting_vmid + index }}
     touch "/tmp/{{ proxmox_template_starting_vmid + index }}_template_provisioned"
-  when: __prox_template_dump.results[index] is failed
+  when: __prox_template_create.results[index] is changed
   async: 600
   poll: 0
   register: __prox_configure_templates

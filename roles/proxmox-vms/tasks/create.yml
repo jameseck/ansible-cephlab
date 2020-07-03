@@ -4,10 +4,6 @@
   changed_when: false
   register: __vm_list
 
-- name: dbg
-  debug:
-    msg: "{{ __vm_list | from_yaml }}"
-
 - name: "{{ vm_name }}: Set facts for VMs and templates"
   set_fact:
     vm_list: "{{ __vm_list.stdout | from_yaml }}"

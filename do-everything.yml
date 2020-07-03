@@ -6,9 +6,7 @@
       api_password: "{{ proxmox_password }}"
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
-  tasks:
-  - name: Add ceph VMs to inventory
-
+  roles:
   - proxmox
   - proxmox-templates
   - proxmox-vms
@@ -54,6 +52,10 @@
     include_role:
       name: ceph
       tasks_from: prep_ansible.yml
+
+- hosts: mons[0]
+  become: no
+  tasks:
   - name: Run ceph-ansible on first mon
     include_role:
       name: ceph

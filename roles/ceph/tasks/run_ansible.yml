@@ -1,10 +1,10 @@
 ---
-- name: Run ceph-ansible (You can check ~/ansible/ansible.log for details)
+- name: "Run ceph-ansible (You can check /home/{{ ansible_ssh_user }}/ansible/ansible.log for details)"
   shell: ansible-playbook -i hosts site.yml
   args:
     chdir: /usr/share/ceph-ansible
   register: __ceph_ansible
-  failed_when: false
+  ignore_errors: true
   async: 1200
   poll: 0
 
@@ -14,12 +14,17 @@
   until: __job_result.finished
   retries: 120
   delay: 10
+  ignore_errors: true
   register: __job_result
+
+- name: dbg
+  debug:
+    var: __ceph_ansible
 
 - name: Show ceph-ansible output
   debug:
     msg: "{{ item }}"
-  loop: "{{ __ceph_ansible.stdout.lines }}"
+  loop: "{{ __ceph_ansible.stdout_lines }}"
 
 - name: Report ceph health
   shell: ceph -s
