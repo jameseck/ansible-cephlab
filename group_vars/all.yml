@@ -1,7 +1,7 @@
 ---
 # Pick one of the scenarios described in the vm_scenarios dict below
 vm_scenario: compact
-vm_default_template: template-rhel78
+vm_default_template: template-rhel82
 
 vm_scenarios:
   compact:

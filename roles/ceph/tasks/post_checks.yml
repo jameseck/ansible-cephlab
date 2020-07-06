@@ -1,0 +1,16 @@
+---
+- name: Check grafana dashboard is working
+  uri:
+    url: "http://{{ hostvars[groups['mons'][0]].ansible_host }}:3000/api/org"
+    user: admin
+    password: "{{ ceph_grafana_admin_password }}"
+    status_code: 200
+
+- name: Check ceph dashboard is working
+  uri:
+    url: "http://{{ hostvars[groups['mons'][0]].ansible_host }}:8443"
+    follow_redirects: yes
+    user: admin
+    password: "{{ ceph_dashboard_admin_password }}"
+    force_basic_auth: yes
+    status_code: 200

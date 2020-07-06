@@ -3,6 +3,15 @@
   hostname:
     name: "{{ inventory_hostname }}"
 
+- name: Add Ansible inventory mappings to /etc/hosts
+  become: yes
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {% for host in (groups['all'] | sort) if host != groups['proxmox_host'][0] %}
+      {{ hostvars[host].ansible_host }} {{ host }}
+      {% endfor %}
+
 - name: Set timezone
   timezone:
     name: "{{ vm_timezone | default(default_vm_timezone) }}"
@@ -22,6 +31,10 @@
 - name: Enable rhsm repositories
   rhsm_repository:
     name: "{{ (ceph_repos[ceph_release | default(default_ceph_release)][ansible_distribution_major_version]) | join(',') }}"
+  register: __rhsm_repos
+  retries: 3
+  delay: 1
+  until: __rhsm_repos is not failed
 
 # We install the ceph-common package so it's easy to run "ceph -s" etc commands on the ceph nodes without having
 # to docker/podman exec

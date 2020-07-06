@@ -17,14 +17,9 @@
   ignore_errors: true
   register: __job_result
 
-- name: dbg
+- name: Show ceph-ansible output
   debug:
     var: __job_result
-
-- name: Show last 20 lines of ceph-ansible output
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ __job_result.stdout_lines[-20:] }}"
 
 - name: Report ceph health
   shell: ceph -s -f json
