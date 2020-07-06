@@ -1,5 +1,6 @@
 ---
 - hosts: proxmox_host
+  gather_facts: no
   module_defaults:
     proxmox_kvm:
       api_user: "{{ proxmox_user }}"
@@ -7,7 +8,12 @@
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
   tasks:
-  - name: Shut down ceph VMs
+  - name: Add VMs to inventory
     include_role:
       name: proxmox-vms
-      tasks_from: shutdown.yml
+      tasks_from: add_to_inventory.yml
+  - name: Show ceph VM info
+    debug:
+      var: vm_details
+  - pause:
+      seconds: 5

@@ -1,0 +1,8 @@
+---
+- hosts: mons[0]
+  become: no
+  tasks:
+  - name: Post ceph-ansible checks
+    include_role:
+      name: ceph
+      tasks_from: post_checks.yml
