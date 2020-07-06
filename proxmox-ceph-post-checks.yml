@@ -18,24 +18,24 @@
   - pause:
       seconds: 10
 
-- hosts:
-  - mons
-  - osds
-  - mdss
-  - rgws
-  - nfss
-  - rbdmirrors
-  - clients
-  - iscsigws
-  - iscsi-gws # for backward compatibility only!
-  - mgrs
-  - grafana-server
-  become: yes
-  tasks:
-  - name: Prep ceph VMs
-    include_role:
-      name: ceph
-      tasks_from: prep.yml
+# - hosts:
+#  - mons
+#  - osds
+#  - mdss
+#  - rgws
+#  - nfss
+#  - rbdmirrors
+#  - clients
+#  - iscsigws
+#  - iscsi-gws # for backward compatibility only!
+#  - mgrs
+#  - grafana-server
+#  become: yes
+#  tasks:
+#  - name: Prep ceph VMs
+#    include_role:
+#      name: ceph
+#      tasks_from: prep.yml
 
 - hosts: mons[0]
   become: no

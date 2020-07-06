@@ -5,12 +5,20 @@
     user: admin
     password: "{{ ceph_grafana_admin_password }}"
     status_code: 200
+  retries: 10
+  delay: 5
+  register: __check_grafana_dash
+  until: __check_grafana_dash is not failed
 
 - name: Check ceph dashboard is working
   uri:
     url: "http://{{ hostvars[groups['mons'][0]].ansible_host }}:8443"
-    follow_redirects: yes
+    follow_redirects: all
     user: admin
     password: "{{ ceph_dashboard_admin_password }}"
     force_basic_auth: yes
     status_code: 200
+  retries: 10
+  delay: 5
+  register: __check_ceph_dash
+  until: __check_ceph_dash is not failed
