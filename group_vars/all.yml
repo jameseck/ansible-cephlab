@@ -1,7 +1,15 @@
 ---
 # Pick one of the scenarios described in the vm_scenarios dict below
 vm_scenario: compact
-vm_default_template: template-rhel82
+
+# Describes the scenarios you wish to create - should be fairly self explanatory
+#
+# vm_scenarios:
+#  <scenario_name>:
+#    <hostname>:
+#      template: <The name of the VM template created by the proxmox-templates role>
+#      disks: # This dict describes additional disks to be added to the VMs
+#      groups: # A list of inventory groups - this is used to build the ceph-ansible inventory file
 
 vm_scenarios:
   compact:
@@ -75,11 +83,18 @@ vm_scenarios:
       groups:
       - mdss
 
+# This is for changes to the ansible.cfg file in /usr/share/ceph-ansible
+ceph_ansible_cfg_changes:
+- regexp: '^log_path = '
+  line: 'log_path = /home/{{ ansible_user }}/ansible/ansible.log'
+
 ceph_ansible_group_vars_changes:
 - name: osds.yml
   changes:
   - regexp: '^#osd_auto_discovery: false$'
     line: 'osd_auto_discovery: true'
+  - regexp: '^#osd_scenario: dummy$'
+    line: 'osd_scenario: collocated'
 - name: all.yml
   changes:
   - regexp: '^ceph_origin: repository'

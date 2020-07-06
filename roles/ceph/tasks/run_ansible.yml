@@ -5,14 +5,14 @@
     chdir: /usr/share/ceph-ansible
   register: __ceph_ansible
   ignore_errors: true
-  async: 1200
+  async: 3600
   poll: 0
 
 - name: Check on ceph-ansible task (this task may take a very long time to complete)
   async_status:
     jid: "{{ __ceph_ansible.ansible_job_id }}"
   until: __job_result.finished
-  retries: 120
+  retries: 600
   delay: 10
   ignore_errors: true
   register: __job_result

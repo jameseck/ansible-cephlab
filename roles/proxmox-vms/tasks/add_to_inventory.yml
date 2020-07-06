@@ -35,3 +35,9 @@
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
+
+- name: Show VM info
+  debug:
+    var: vm_details
+- pause:
+    seconds: 5

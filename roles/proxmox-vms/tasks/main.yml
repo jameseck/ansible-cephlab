@@ -7,7 +7,7 @@
     vm_name: "{{ item.key }}"
     vm_id: "{{ proxmox_vm_starting_vmid + index }}"
     vm_network: "{{ item.value.network | default(proxmox_network) }}"
-    vm_template: "{{ item.value.template }}"
+    vm_template: "{{ item.value.template | default(default_vm_template) }}"
     vm_storage: "{{ item.value.storage | default(proxmox_storage) }}"
     cpu_count: "{{ item.value.cpu_count | default(vm_cpu_count) | default(default_vm_cpu_count) }}"
     memory_mb: "{{ item.value.memory_mb | default(vm_memory_mb) | default(default_vm_memory_mb) }}"

@@ -2,21 +2,6 @@
 - import_playbook: proxmox-create-templates.yml
 - import_playbook: proxmox-create-vms.yml
 
-- hosts: proxmox_host
-  gather_facts: no
-  module_defaults:
-    proxmox_kvm:
-      api_user: "{{ proxmox_user }}"
-      api_password: "{{ proxmox_password }}"
-      api_host: "{{ groups['proxmox_host'][0] }}"
-      node: "{{ groups['proxmox_host'][0] }}"
-  tasks:
-  - name: Show ceph VM info
-    debug:
-      var: vm_details
-  - pause:
-      seconds: 10
-
 - hosts:
   - mons
   - osds
@@ -26,10 +11,10 @@
   - rbdmirrors
   - clients
   - iscsigws
-  - iscsi-gws # for backward compatibility only!
   - mgrs
   - grafana-server
   become: yes
+  any_errors_fatal: yes
   tasks:
   - name: Prep ceph VMs
     include_role:

@@ -23,7 +23,7 @@
     password: "{{ rhsm_password }}"
     auto_attach: true
   register: __rhsm_register
-  retries: 3
+  retries: 10
   delay: 1
   until: __rhsm_register is not failed
 
@@ -32,7 +32,7 @@
   rhsm_repository:
     name: "{{ (ceph_repos[ceph_release | default(default_ceph_release)][ansible_distribution_major_version]) | join(',') }}"
   register: __rhsm_repos
-  retries: 3
+  retries: 10
   delay: 1
   until: __rhsm_repos is not failed
 

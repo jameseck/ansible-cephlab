@@ -15,6 +15,7 @@ proxmox_network=vmbr0
 
 vm_cpu_count=2
 vm_memory_mb=4096
+vm_default_template=template-rhel78
 
 # A directory on the proxmox host to store the qcow images before import
 proxmox_template_qcow_storage_dir=
@@ -30,3 +31,5 @@ admin_ssh_key=
 # Since we are building RHEL VM's, we'll need a way to register the servers with RHSM
 rhsm_username=
 rhsm_password=
+# Set this to change the ceph release - default is rhcs4 (in roles/ceph/defaults/main.yml)
+# ceph_release=rhcs4

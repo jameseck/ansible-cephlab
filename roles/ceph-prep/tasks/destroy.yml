@@ -1,6 +1,0 @@
----
-- name: Remove RHSM subscription
-  redhat_subscription:
-    state: absent
-    username: "{{ rhsm_username }}"
-    password: "{{ rhsm_password }}"

@@ -1,12 +1,13 @@
 This repo contains all the ansible code required to spin up ceph clusters on Proxmox (different virt tech to be added)
 
-There are basically the following steps to be performed:
+There are essentially the following steps to be performed:
 - Create VM template(s)
-- Create VM's from templates
-- Start VM's
-- Add VM's to ansible inventory
-- Configure hostnames and rhsm repos on the running VM's
+- Create Ceph VM's from templates
+- Start Ceph VM's
+- Add Ceph VM's to ansible inventory
+- Configure hostnames, rhsm repos and other ceph-ansible prep on the running VM's
 - Run ceph-ansible to stand up Ceph cluster
+- Some post checks are run against the Ceph cluster
 
 Usage
 =====

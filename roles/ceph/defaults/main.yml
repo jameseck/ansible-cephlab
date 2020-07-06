@@ -1,40 +1,28 @@
 ---
-# Currently we are going to just enable all ceph repos on all nodes as it's complicated to work out which nodes need which repos
-
-# From docs: Enable the Red Hat Ceph Storage 4 Tools repository on the following node types: RBD mirroring, Ceph clients, Ceph Object Gateways, Metadata Servers, NFS, iSCSI gateways, and Dashboard servers.
-# host groups we could encounter:
-#  - mons
-#  - osds
-#  - mdss
-#  - rgws
-#  - nfss
-#  - rbdmirrors
-#  - clients
-#  - iscsigws
-#  - iscsi-gws # for backward compatibility only!
-#  - mgrs
-#  - grafana-server
 default_ceph_release: rhcs4
 
-default_vm_timezone: Europe/London
+default_vm_timezone: UTC
 
 ceph_dashboard_admin_password: p@ssw0rd
 ceph_grafana_admin_password: p@ssw0rd
 
+# Currently we are going to just enable all ceph repos on all nodes as it's complicated to work out which nodes need which repos
 ceph_repos:
   rhcs4:
     "7":
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
     - rhel-7-server-ansible-2.8-rpms
     - rhel-7-server-rhceph-4-tools-rpms
     - rhel-7-server-rhceph-4-mon-rpms
     - rhel-7-server-rhceph-4-osd-rpms
-    - rhel-7-server-rpms
-    - rhel-7-server-extras-rpms
-    - rhel-7-server-optional-rpms
     "8":
     - ansible-2.8-for-rhel-8-x86_64-rpms
     - rhceph-4-tools-for-rhel-8-x86_64-rpms
   rhcs3:
     "7":
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
     - rhel-7-server-ansible-2.6-rpms
     - rhel-7-server-rhceph-3-tools-rpms
