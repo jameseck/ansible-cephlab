@@ -1,0 +1,8 @@
+---
+- hosts: mons[0]
+  become: no
+  tasks:
+  - name: Run ceph-ansible on first mon
+    include_role:
+      name: ceph
+      tasks_from: run_ansible.yml

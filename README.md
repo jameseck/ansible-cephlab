@@ -14,7 +14,7 @@ Usage
 
 For a simple start, do the following:
 
-Firstly, you will need a cloud image for the OS you wish to use.  We have two templates defined currently, rhel78 and rhel82.
+Firstly, you will need a cloud image for the OS you wish to use.  We have two templates defined currently, rhel78 and rhel82
 These are defined in the roles/proxmox-templates/defaults/main.yml:
 ```
 proxmox_templates:
@@ -26,7 +26,7 @@ proxmox_templates:
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
 ```
 
-These image files need to be on the host running this ansible code - specify the qcow_image_local_sour_dir variable in the inventory to point to their location.
+These image files need to be on the host running this ansible code - specify the qcow_image_local_sour_dir variable in the inventory to point to their location
 
 It is planned to download these directly from RH but this hasn't yet been implemented.
 
@@ -43,7 +43,7 @@ ansible-playbook -i inventory proxmox-create-templates.yml
 ansible-playbook -i inventory proxmox-create-vms-and-ceph.yml
 ```
 
-This should result in a set of deployed VM's with ceph-ansible installed and configured on the first mon VM.
+This should result in a set of deployed VM's with ceph-ansible installed and configured on the first mon VM
 We default to rhel7 and rhcs4 (containerised)
 
 To install ceph, log into the first mon node and run:
@@ -56,7 +56,13 @@ ansible-playbook -i hosts site.yml
 Proxmox
 =======
 
-The template VM's have defaults set for memory and cpu.  These can be modified by settings vm_memory_mb and vm_cpu_count in the inventory file.
-Re-running the proxmox-create-vms\*.yml playbooks will update any VM's already created.
-Reducing the amount of assigned memory may result in an error from the Proxmox API.
+The template VM's have defaults set for memory and cpu.  These can be modified by settings vm_memory_mb and vm_cpu_count in the inventory file
+Re-running the proxmox-create-vms\*.yml playbooks will update any VM's already created
+Reducing the amount of assigned memory may result in an error from the Proxmox API
 
+
+Ceph
+====
+
+For rhcs3, there is an additional task (roles/ceph/tasks/rhcs3_metrics.yml) which is called by roles/ceph/tasks/run_ansible.yml
+For rhcs4, the metrics are deployed by ceph-ansible

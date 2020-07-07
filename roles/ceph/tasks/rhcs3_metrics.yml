@@ -1,0 +1,36 @@
+---
+# This is only to be used on rhcs3 as the ceph metrics are included in ceph-ansible in >rhcs3
+- name: Install cephmetrics-ansible package
+  package:
+    name: cephmetrics-ansible
+    state: present
+  become: yes
+
+- name: set log_path to ~/ansible/cephmetrics-ansible.log
+  lineinfile:
+    path: /usr/share/ceph-ansible/ansible.cfg
+    regexp: '^log_path = '
+    line: 'log_path = /home/{{ ansible_user }}/ansible/cephmetrics-ansible.log'
+    state: present
+
+- name: Run cephmetrics-ansible (You can check ~/ansible/ansible.log for details)
+  shell: ansible-playbook -i /usr/share/ceph-ansible/hosts playbook.yml
+  args:
+    chdir: /usr/share/cephmetrics-ansible
+  register: __cephmetrics_ansible
+  ignore_errors: true
+  async: 3600
+  poll: 0
+
+- name: Check on cephmetrics-ansible task (this task may take a very long time to complete)
+  async_status:
+    jid: "{{ __cephmetrics_ansible.ansible_job_id }}"
+  until: __job_result.finished
+  retries: 600
+  delay: 10
+  ignore_errors: true
+  register: __job_result
+
+- name: Show cephmetrics-ansible output
+  debug:
+    var: __job_result

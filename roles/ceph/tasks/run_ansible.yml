@@ -21,6 +21,10 @@
   debug:
     var: __job_result
 
+- name: Include cephmetrics
+  import_tasks: rhcs3_metrics.yml
+  when: ceph_release == 'rhcs3'
+
 - name: Report ceph health
   shell: ceph -s -f json
   register: __ceph_health

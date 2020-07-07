@@ -1,0 +1,8 @@
+---
+- hosts: mons[0]
+  become: yes
+  tasks:
+  - name: Deploy ceph-ansible
+    include_role:
+      name: ceph
+      tasks_from: prep_ansible.yml
