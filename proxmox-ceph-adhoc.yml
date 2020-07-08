@@ -1,0 +1,20 @@
+---
+- import_playbook: proxmox-ceph-add-to-inventory.yml
+
+- hosts:
+  - mons
+  - osds
+  - mdss
+  - rgws
+  - nfss
+  - rbdmirrors
+  - clients
+  - iscsigws
+  - mgrs
+  - grafana-server
+  become: yes
+  tasks:
+  - name: Remove ceph VMs
+    include_role:
+      name: ceph
+      tasks_from: destroy.yml

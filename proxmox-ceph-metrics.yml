@@ -1,0 +1,11 @@
+---
+- import_playbook: proxmox-ceph-add-to-inventory.yml
+#- import_playbook: ceph-run-ansible.yml
+
+- hosts: mons[0]
+  become: no
+  tasks:
+  - name: metrics
+    include_role:
+      name: ceph
+      tasks_from: rhcs3_metrics.yml

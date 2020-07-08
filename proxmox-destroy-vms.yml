@@ -14,8 +14,7 @@
   - grafana-server
   become: yes
   tasks:
-  - name: Remove ceph RHSM subscriptions
-    include_role:
+  - include_role:
       name: ceph
       tasks_from: destroy.yml
 
@@ -27,7 +26,6 @@
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
   tasks:
-  - name: Destroy ceph VMs
-    include_role:
+  - include_role:
       name: proxmox-vms
       tasks_from: destroy.yml

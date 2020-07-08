@@ -12,8 +12,8 @@
   async_status:
     jid: "{{ __ceph_ansible.ansible_job_id }}"
   until: __job_result.finished
-  retries: 600
-  delay: 10
+  retries: 200
+  delay: 30
   ignore_errors: true
   register: __job_result
 

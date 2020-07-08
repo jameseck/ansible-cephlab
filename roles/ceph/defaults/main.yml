@@ -26,3 +26,52 @@ ceph_repos:
     - rhel-7-server-extras-rpms
     - rhel-7-server-ansible-2.6-rpms
     - rhel-7-server-rhceph-3-tools-rpms
+
+ceph_ansible_cfg_changes:
+- section: defaults
+  option: log_path
+  value: "/home/{{ ansible_user }}/ansible/ansible.log"
+
+ceph_ansible_group_vars_changes:
+- name: osds.yml
+  changes:
+  - regexp: '^#osd_auto_discovery: false$'
+    line: 'osd_auto_discovery: true'
+  - regexp: '^#osd_scenario: dummy$'
+    line: 'osd_scenario: collocated'
+- name: all.yml
+  changes:
+  - regexp: '^ceph_origin: repository'
+    line: 'ceph_origin: distro'
+  - regexp: '^#monitor_interface: interface'
+    line: 'monitor_interface: eth0'
+  - regexp: '^containerized_deployment: False'
+    line: 'containerized_deployment: True'
+  - regexp: '^#ceph_docker_registry_username:'
+    line: !unsafe "ceph_docker_registry_username: \"{{ '{{' }} rhsm_username {{ '}}' }}\""
+  - regexp: '^#ceph_docker_registry_password:'
+    line: !unsafe "ceph_docker_registry_password: \"{{ '{{' }} rhsm_password {{ '}}' }}\""
+  - regexp: '^#dashboard_admin_password:'
+    line: !unsafe "dashboard_admin_password: \"{{ '{{' }} ceph_dashboard_admin_password {{ '}}' }}\""
+  - regexp: '^#grafana_admin_password:'
+    line: !unsafe "grafana_admin_password: \"{{ '{{' }} ceph_grafana_admin_password {{ '}}' }}\""
+
+cephmetrics_ansible_cfg_changes:
+- section: defaults
+  option: log_path
+  value: "/home/{{ ansible_user }}/ansible/cephmetrics-ansible.log"
+- section: defaults
+  option: retry_files_save_path
+  value: "/home/{{ ansible_user }}/ansible"
+
+cephmetrics_ansible_group_vars_changes:
+- name: all.yml
+  changes:
+  - regexp: '^#grafana:'
+    line: 'grafana:'
+  - regexp: 'admin_user: '
+    line: '  admin_user: admin'
+  # I'd have preferred to use the same method for the admin_password here that was used previously where we put a reference to the var in the group_vars file,
+  # rather than the actual value but something about cephmetrics-ansible doesn't like this so hardcoded it is
+  - regexp: 'admin_password: '
+    line: "  admin_password: {{ ceph_grafana_admin_password }}"

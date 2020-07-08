@@ -6,12 +6,32 @@
     state: present
   become: yes
 
-- name: set log_path to ~/ansible/cephmetrics-ansible.log
-  lineinfile:
-    path: /usr/share/ceph-ansible/ansible.cfg
-    regexp: '^log_path = '
-    line: 'log_path = /home/{{ ansible_user }}/ansible/cephmetrics-ansible.log'
+- name: Modify ansible.cfg
+  ini_file:
+    path: /usr/share/cephmetrics-ansible/ansible.cfg
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
     state: present
+  loop: "{{ cephmetrics_ansible_cfg_changes }}"
+  become: yes
+
+- name: Seed group_vars/all.yml file from sample file
+  copy:
+    src: /usr/share/cephmetrics-ansible/group_vars/all.yml.sample
+    dest: /usr/share/cephmetrics-ansible/group_vars/all.yml
+    remote_src: yes
+    force: no
+  become: yes
+
+- name: Modify group_vars files
+  become: yes
+  lineinfile:
+    path: "/usr/share/cephmetrics-ansible/group_vars/{{ item.0.name }}"
+    regexp: "{{ item.1.regexp }}"
+    line: "{{ item.1.line }}"
+    state: present
+  loop: "{{ cephmetrics_ansible_group_vars_changes | subelements('changes') }}"
 
 - name: Run cephmetrics-ansible (You can check ~/ansible/ansible.log for details)
   shell: ansible-playbook -i /usr/share/ceph-ansible/hosts playbook.yml

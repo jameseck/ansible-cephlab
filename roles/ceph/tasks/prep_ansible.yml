@@ -41,9 +41,10 @@
   loop: "{{ ceph_ansible_group_vars_changes | subelements('changes') }}"
 
 - name: Modify ansible.cfg
-  lineinfile:
+  ini_file:
     path: /usr/share/ceph-ansible/ansible.cfg
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
     state: present
   loop: "{{ ceph_ansible_cfg_changes }}"

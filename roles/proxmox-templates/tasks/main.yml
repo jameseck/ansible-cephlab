@@ -64,7 +64,6 @@
     qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
     qm set {{ proxmox_template_starting_vmid + index }} --numa 1
     qm template {{ proxmox_template_starting_vmid + index }}
-    touch "/tmp/{{ proxmox_template_starting_vmid + index }}_template_provisioned"
   when: __prox_template_create.results[index] is changed
   async: 600
   poll: 0

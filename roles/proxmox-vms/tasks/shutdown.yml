@@ -4,6 +4,7 @@
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"
     state: stopped
+    force: yes
   ignore_errors: yes
   async: 600
   poll: 0

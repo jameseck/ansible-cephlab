@@ -10,6 +10,9 @@ proxmox_password=
 # The proxmox storage pool to use for templates and VMs
 proxmox_storage=
 
+# The proxmox snippet storage pool
+proxmox_storage_snippet=
+
 # The proxmox network to be used by the VMs
 proxmox_network=vmbr0
 

@@ -1,0 +1,35 @@
+---
+- name: Register system with rhsm
+  redhat_subscription:
+    state: present
+    username: "{{ rhsm_username }}"
+    password: "{{ rhsm_password }}"
+    auto_attach: true
+  register: __rhsm_register
+  retries: 10
+  delay: 1
+  until: __rhsm_register is not failed
+
+- name: Update packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: Remove RHSM subscription
+  redhat_subscription:
+    state: absent
+    username: "{{ rhsm_username }}"
+    password: "{{ rhsm_password }}"
+
+- name: Cleanup template
+  shell: |
+    yum clean all
+    sed -i ‘/^(HWADDR|UUID)=/d’ /etc/sysconfig/network-scripts/ifcfg-eth0
+    > /etc/machine-id
+    rm –rf /tmp/* /var/tmp/*
+    rm -f /etc/ssh/ssh_host /root/.bash_history
+    rm -f /var/log/{cron,boot.log,dmesg,grubby,lastlog,maillog,messages,secure,spooler,tallylog,wtmp,yum.log} /var/log/audit/audit.log /var/log/ovirt-guest-agent/ovirt-guest-agent.log /var/log/tuned/tuned.log
+    rm -rf /var/lib/cloud/instances
+    unset HISTFILE
+    sys-unconfig
+  failed_when: false
