@@ -1,0 +1,10 @@
+#cloud-config
+#hostname: {{ item.key }}
+manage_etc_hosts: false
+ssh_authorized_keys:
+  - "{{ admin_ssh_key }}"
+chpasswd:
+  expire: False
+users:
+  - default
+package_upgrade: true

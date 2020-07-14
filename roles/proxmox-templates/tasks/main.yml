@@ -16,14 +16,6 @@
     mode: 0644
   loop: "{{ proxmox_templates | dict2items }}"
 
-- name: Deploy ssh key file to proxmox host
-  copy:
-    dest: /tmp/admin_ssh_key
-    content: "{{ admin_ssh_key }}"
-    owner: root
-    group: root
-    mode: 0600
-
 - name: Create template VMs
   proxmox_kvm:
     name: "{{ item.key }}"
@@ -53,6 +45,26 @@
   - __prox_template_create_check.status == 'stopped'
   register: __prox_template_create_check
 
+- name: Get snippet storage path
+  shell: pvesh get /storage/vmstor-snippets --output-format json | jq -r '.path'
+  changed_when: false
+  register: __prox_snippet_path
+
+- name: set snippet storage path fact
+  set_fact:
+    proxmox_snippet_path: "{{ __prox_snippet_path.stdout }}"
+
+- name: Create template snippets
+  template:
+    src: cloud-init.cfg.j2
+    dest: "{{ proxmox_snippet_path }}/snippets/{{ item.key }}-cloud-init.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ proxmox_templates | dict2items }}"
+  loop_control:
+    index_var: index
+
 - name: Configure templates
   shell: |
     #!/bin/bash
@@ -60,7 +72,7 @@
     qm importdisk {{ proxmox_template_starting_vmid + index }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
     qm set {{ proxmox_template_starting_vmid + index }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ proxmox_template_starting_vmid + index }}-disk-0
     qm set {{ proxmox_template_starting_vmid + index }} --ide2 {{ proxmox_storage }}:cloudinit
-    qm set {{ proxmox_template_starting_vmid + index }} --sshkeys /tmp/admin_ssh_key
+    qm set {{ proxmox_template_starting_vmid + index }} --cicustom user={{ proxmox_storage_snippets }}:snippets/{{ item.key }}-cloud-init.cfg
     qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
     qm set {{ proxmox_template_starting_vmid + index }} --numa 1
     qm template {{ proxmox_template_starting_vmid + index }}
