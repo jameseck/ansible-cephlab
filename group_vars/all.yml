@@ -8,7 +8,7 @@ vm_scenario: compact
 #  <scenario_name>:
 #    <hostname>:
 #      template: <The name of the VM template created by the proxmox-templates role>
-#      disks: # This dict describes additional disks to be added to the VMs
+#      disks: # A list of dicts describing additional disks to be added to the VMs (scsi1, scsi2 etc follows the proxmox syntax for disks)
 #      groups: # A list of inventory groups - this is used to build the ceph-ansible inventory file
 
 vm_scenarios:
@@ -16,8 +16,10 @@ vm_scenarios:
     ceph1:
       template: "{{ vm_default_template }}"
       disks:
-        scsi1: 20
-        scsi2: 20
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
       groups:
       - mons
       - mgrs
@@ -28,8 +30,10 @@ vm_scenarios:
     ceph2:
       template: "{{ vm_default_template }}"
       disks:
-        scsi1: 20
-        scsi2: 20
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
       groups:
       - mons
       - mgrs
@@ -38,8 +42,10 @@ vm_scenarios:
     ceph3:
       template: "{{ vm_default_template }}"
       disks:
-        scsi1: 20
-        scsi2: 20
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
       groups:
       - mons
       - mgrs
@@ -66,14 +72,29 @@ vm_scenarios:
       template: "{{ vm_default_template }}"
       groups:
       - osds
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
     osd2:
       template: "{{ vm_default_template }}"
       groups:
       - osds
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
     osd3:
       template: "{{ vm_default_template }}"
       groups:
       - osds
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
     mds1:
       template: "{{ vm_default_template }}"
       groups:
@@ -82,4 +103,3 @@ vm_scenarios:
       template: "{{ vm_default_template }}"
       groups:
       - mdss
-

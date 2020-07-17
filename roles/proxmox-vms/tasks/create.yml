@@ -1,65 +1,51 @@
 ---
-- name: "{{ vm_name }}: Gather list of VMs"
+- name: Gather list of VMs
   shell: pvesh get /cluster/resources -type vm --output-format yaml
   changed_when: false
   register: __vm_list
 
-- name: "{{ vm_name }}: Set facts for VMs and templates"
+- name: Set facts for VMs and templates
   set_fact:
     vm_list: "{{ __vm_list.stdout | from_yaml }}"
     vm_templates: "{{ (__vm_list.stdout | from_yaml) | selectattr('template', 'equalto', 1) | list }}"
 
-- name: "{{ vm_name }}: Fail if template does not exist"
+- name: Fail if template does not exist
   fail:
     msg: "Template '{{ vm_template }}' does not exist"
   when: "not (vm_templates | selectattr('name', 'equalto', vm_template)) | list"
 
-# NOTE: Due to bugs with proxmox_kvm, creating linked clones does not seem to work so we're using pvesh below instead
-#- name: "{{ vm_name }}: Create VM"
-#  proxmox_kvm:
-#    name: "{{ vm_name }}"
-#    #cores: "{{ cpu_count }}"
-#    #memory: "{{ memory_mb }}"
-#    #net: '{"net0":"virtio,bridge={{ vm_network | default(default_proxmox_network) }}"}'
-#    clone: "{{ vm_template }}"
-#    full: no
-#    #vmid: "{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}"
-#    newid: "{{ vm_id }}"
-#    #storage: "{{ vm_storage | default(default_proxmox_storage) }}"
-#    #scsi: "{{ vm_disks }}" # NOTE: this does not seem to work, maybe because it's a clone?
-#    #scsihw: virtio-scsi-pci
-#    #agent: yes
-#    timeout: 500
+- name: Create VMs
+  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ proxmox_vm_starting_vmid + index }} -name {{ item.key }}"
+  when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (proxmox_vm_starting_vmid + index)|string) | list)"
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop_control:
+    index_var: index
 
-- name: "{{ vm_name }}: Create VM"
-  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ vm_id }} -name {{ vm_name }}"
-  when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (vm_id|string)) | list)"
-
-- name: "{{ vm_name }}: Retrieve VM config"
-  shell: pvesh get /nodes/{{ proxmox_host }}/qemu/{{ vm_id }}/config --output-format yaml
-  changed_when: false
+- name: Retrieve VM configs
+  prox_get_vm_configs:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ groups['proxmox_host'][0] }}"
+    node: "{{ groups['proxmox_host'][0] }}"
   register: __prox_vm_config
 
-- name: "{{ vm_name }}: Set VM config fact"
-  set_fact:
-    __vm_config: "{{ __prox_vm_config.stdout | from_yaml }}"
-
-- name: "{{ vm_name }}: Create additional VM disks"
-  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ vm_id }}/config -{{ itm.key }} {{ vm_storage }}:{{ itm.value }}"
-  when: itm.key not in __vm_config
-  loop: "{{ vm_disks | dict2items }}"
-  loop_control:
-    index_var: idx
-    loop_var: itm
+- name: Create additional VMs disks
+  shell: |
+    pvesh create /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_config.vm_configs[item.0.key]['vmid'] }}/config -{{ item.1.name }} {{ item.value.vm_storage | default(proxmox_storage) }}:{{ item.1.size }}
+  when: "item.1.name not in __prox_vm_config.vm_configs[item.0.key]"
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items | subelements('value.disks') }}"
 
 # This crap ALWAYS reports updated even when nothing changes at all
-- name: "{{ vm_name }}: Update VM config"
+- name: Update VMs config
   proxmox_kvm:
-    vmid: "{{ vm_id }}"
-    name: "{{ vm_name }}"
-    memory: "{{ memory_mb }}"
-    cores: "{{ cpu_count }}"
+    vmid: "{{ proxmox_vm_starting_vmid + index }}"
+    name: "{{ item.key }}"
+    memory: "{{ item.value.memory_mb | default(vm_memory_mb) }}"
+    cores: "{{ item.value.cpu_count | default(vm_cpu_count) }}"
     update: yes
   changed_when: false
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop_control:
+    index_var: index
 
 # TODO: Add some code to handle updating the SSH key
