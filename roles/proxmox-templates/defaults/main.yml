@@ -13,3 +13,6 @@ proxmox_templates:
   template-rhel82:
     image: rhel-8.2-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
+  template-rhel81:
+    image: rhel-8.1-update-3-x86_64-kvm.qcow2
+    src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
