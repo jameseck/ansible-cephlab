@@ -23,36 +23,36 @@
     memory: "{{ item.value.memory_mb | default(default_vm_memory_mb) }}"
     hotplug: network,disk,cpu,memory,usb
     onboot: "{{ item.value.onboot | default(default_vm_onboot) }}"
-    vmid: "{{ proxmox_template_starting_vmid + index }}"
+    vmid: "{{ item.value.vmid | default(omit) }}"
     net: '{"net0":"virtio,bridge={{ proxmox_network }}"}'
     agent: yes
   loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
-  register: __prox_template_create
 
 - name: Wait for template VMs creation
   proxmox_kvm:
     name: "{{ item.key }}"
     state: current
   loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
   retries: 10
   delay: 2
+  register: __proxmox_template_create_check
   until:
-  - __prox_template_create_check is not failed
-  - __prox_template_create_check.status == 'stopped'
-  register: __prox_template_create_check
+  - __proxmox_template_create_check is not failed
+  - __proxmox_template_create_check.status == 'stopped' or __proxmox_template_create_check.status == 'running'
 
 - name: Get snippet storage path
-  shell: pvesh get /storage/vmstor-snippets --output-format json | jq -r '.path'
+  shell: |
+    #!/bin/bash
+    set -o pipefail
+    pvesh get /storage/{{ proxmox_storage_snippets }} --output-format json | jq -r '.path'
+  args:
+    executable: /bin/bash
   changed_when: false
-  register: __prox_snippet_path
+  register: __proxmox_snippet_path
 
 - name: set snippet storage path fact
   set_fact:
-    proxmox_snippet_path: "{{ __prox_snippet_path.stdout }}"
+    proxmox_snippet_path: "{{ __proxmox_snippet_path.stdout }}"
 
 - name: Create template snippets
   template:
@@ -62,37 +62,38 @@
     group: root
     mode: 0644
   loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
 
-- name: Configure templates
+- name: Get VM config
+  prox_get_vm_configs:
+  register: __vm_configs
+
+- name: Import qcow image to template
   shell: |
     #!/bin/bash
     set -e
-    qm importdisk {{ proxmox_template_starting_vmid + index }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
-    qm set {{ proxmox_template_starting_vmid + index }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ proxmox_template_starting_vmid + index }}-disk-0
-    qm set {{ proxmox_template_starting_vmid + index }} --ide2 {{ proxmox_storage }}:cloudinit
-    qm set {{ proxmox_template_starting_vmid + index }} --cicustom user={{ proxmox_storage_snippets }}:snippets/{{ item.key }}-cloud-init.cfg
-    qm set {{ proxmox_template_starting_vmid + index }} --boot c --bootdisk scsi0
-    qm set {{ proxmox_template_starting_vmid + index }} --numa 1
-    qm template {{ proxmox_template_starting_vmid + index }}
-  when: __prox_template_create.results[index] is changed
-  async: 600
-  poll: 0
-  register: __prox_configure_templates
+    qm importdisk {{ __vm_configs.vm[item.key].vmid }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
+    qm set {{ __vm_configs.vm[item.key].vmid }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ __vm_configs.vm[item.key].vmid }}-disk-0
+  when: __vm_configs.vm[item.key].scsi0 is not defined
   loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
 
-- name: Check on "Configure templates" task - this can take a while due to copying qcow images
-  async_status:
-    jid: "{{ async_result_item.ansible_job_id }}"
-  loop: "{{ __prox_configure_templates.results }}"
-  loop_control:
-    loop_var: async_result_item
-    index_var: index
-  register: __job_result
-  when: __prox_configure_templates.results[index] is not skipped
-  until: __job_result.finished
-  retries: 60
-  delay: 5
+- name: Configure template
+  shell: |
+    #!/bin/bash
+    set -e
+    qm set {{ __vm_configs.vm[item.key].vmid }} --ide2 {{ proxmox_storage }}:cloudinit
+    qm set {{ __vm_configs.vm[item.key].vmid }} --cicustom user={{ proxmox_storage_snippets }}:snippets/{{ item.key }}-cloud-init.cfg
+    qm set {{ __vm_configs.vm[item.key].vmid }} --boot c --bootdisk scsi0
+    qm set {{ __vm_configs.vm[item.key].vmid }} --numa 1
+  when: __vm_configs.vm[item.key].ide2 is not defined
+  loop: "{{ proxmox_templates | dict2items }}"
+
+#- debug:
+#    msg: "{{ __vm_configs.vm | dict2items | selectattr('value.template', 'defined') | list }}"
+
+- name: Prepare templates
+  include_tasks: prep.yml
+
+- name: Convert to templates
+  shell: qm template {{ __vm_configs.vm[item.key].vmid }}
+  when: __vm_configs.vm[item.key].template is not defined or __vm_configs.vm[item.key].template == 0
+  loop: "{{ proxmox_templates | dict2items }}"

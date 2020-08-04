@@ -1,35 +1,104 @@
 ---
-- name: Register system with rhsm
+
+# This should only be run if the template does not exist (could tag it with template-prep so it can be forced later)
+# The tasks in this file should do the following:
+# - start the template
+# - register with rhsm
+# - yum update
+# - remove the rhsm subscription
+# - sysprep/remove system specific crap
+# - stop the template
+
+- name: Get VM config
+  prox_get_vm_configs:
+  register: __vm_configs
+
+- name: Ensure VMs are started
+  proxmox_kvm:
+    vmid: "{{ __vm_configs.vm[item.key].vmid }}"
+    state: started
+  loop: "{{ proxmox_templates | dict2items }}"
+  when: __vm_configs.vm[item.key].template is not defined or __vm_configs.vm[item.key].template == 0
+  loop_control:
+    index_var: index
+
+- include_tasks: add_templates_to_inventory.yml
+
+- name: ping template vms
+  ping:
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['templates'] }}"
+
+- name: Register with RHSM
+  become: yes
   redhat_subscription:
     state: present
     username: "{{ rhsm_username }}"
     password: "{{ rhsm_password }}"
+    pool_ids: "{{ rhsm_pool_id | default(omit) }}"
+    release: "{{ proxmox_templates[item].rhsm_release | default(omit) }}"
     auto_attach: true
-  register: __rhsm_register
   retries: 10
   delay: 1
   until: __rhsm_register is not failed
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['templates'] }}"
+  register: __rhsm_register
+  tags:
+  - rhsm
+
+#- name: Set RHSM release
+#  become: yes
+#  rhsm_release:
+#    release: "{{ proxmox_templates[item].rhsm_release }}"
+#  delegate_to: "{{ item }}"
+#  when: proxmox_templates[item].rhsm_release is defined
+#  loop: "{{ groups['templates'] }}"
+#  tags:
+#  - rhsm
 
 - name: Update packages
+  become: yes
   yum:
     name: "*"
     state: latest
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['templates'] }}"
+  tags:
+  - rhsm
 
 - name: Remove RHSM subscription
+  become: yes
   redhat_subscription:
     state: absent
     username: "{{ rhsm_username }}"
     password: "{{ rhsm_password }}"
+  retries: 10
+  delay: 1
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['templates'] }}"
+  until: __rhsm_unregister is not failed
+  register: __rhsm_unregister
+  tags:
+  - rhsm
 
 - name: Cleanup template
-  shell: |
+  become: yes
+  shell: |  # noqa 301 303
+    #!/bin/bash
+    set -o pipefail
     yum clean all
-    sed -i ‘/^(HWADDR|UUID)=/d’ /etc/sysconfig/network-scripts/ifcfg-eth0
+    sed -i '/^(HWADDR|UUID)=/d' /etc/sysconfig/network-scripts/ifcfg-eth0
     > /etc/machine-id
     rm –rf /tmp/* /var/tmp/*
-    rm -f /etc/ssh/ssh_host /root/.bash_history
-    rm -f /var/log/{cron,boot.log,dmesg,grubby,lastlog,maillog,messages,secure,spooler,tallylog,wtmp,yum.log} /var/log/audit/audit.log /var/log/ovirt-guest-agent/ovirt-guest-agent.log /var/log/tuned/tuned.log
+    rm -f /etc/ssh/ssh_host_* /root/.bash_history
+    rm -f /var/log/{cron,dmesg,grubby,lastlog,maillog,messages,secure,spooler,tallylog,wtmp,*.log}
+    rm -f /var/log/audit/audit.log /var/log/ovirt-guest-agent/ovirt-guest-agent.log /var/log/tuned/tuned.log
     rm -rf /var/lib/cloud/instances
     unset HISTFILE
-    sys-unconfig
+    touch /.unconfigured
   failed_when: false
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['templates'] }}"
+
+- include_tasks: stop.yml

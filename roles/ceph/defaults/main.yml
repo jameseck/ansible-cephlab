@@ -1,12 +1,14 @@
 ---
 default_ceph_release: rhcs4
+default_ceph_cluster_name: cluster1
 
 default_vm_timezone: UTC
 
 ceph_dashboard_admin_password: p@ssw0rd
 ceph_grafana_admin_password: p@ssw0rd
 
-# Currently we are going to just enable all ceph repos on all nodes as it's complicated to work out which nodes need which repos
+# Currently we are going to just enable all ceph repos on all nodes
+# as it's complicated to work out which nodes need which repos
 ceph_repos:
   rhcs4:
     "7":

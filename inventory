@@ -34,5 +34,8 @@ admin_ssh_key=
 # Since we are building RHEL VM's, we'll need a way to register the servers with RHSM
 rhsm_username=
 rhsm_password=
+#rhsm_pool_id=
 # Set this to change the ceph release - default is rhcs4 (in roles/ceph/defaults/main.yml)
 # ceph_release=rhcs4
+# Set this to have multiple ceph clusters
+#ceph_cluster_name=cluster1

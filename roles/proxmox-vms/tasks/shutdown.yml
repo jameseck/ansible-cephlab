@@ -24,7 +24,7 @@
   retries: 60
   delay: 5
 
-- name: Poll VM status
+- name: Wait until VMs are stopped
   proxmox_kvm:
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ item.key }}"

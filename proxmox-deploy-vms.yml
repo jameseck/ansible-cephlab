@@ -1,0 +1,7 @@
+---
+- import_playbook: proxmox-create-vms.yml
+
+- import_playbook: ceph-prep.yml
+- import_playbook: ceph-prep-ansible.yml
+- import_playbook: ceph-run-ansible.yml
+- import_playbook: ceph-post-checks.yml

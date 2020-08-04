@@ -15,7 +15,11 @@
   when: "not (vm_templates | selectattr('name', 'equalto', vm_template)) | list"
 
 - name: Create VMs
-  shell: "pvesh create /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone -newid {{ proxmox_vm_starting_vmid + index }} -name {{ item.key }}"
+  shell: |
+    pvesh create \
+        /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone \
+        -newid {{ proxmox_vm_starting_vmid + index }} \
+        -name {{ item.key }}
   when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (proxmox_vm_starting_vmid + index)|string) | list)"
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
@@ -23,16 +27,14 @@
 
 - name: Retrieve VM configs
   prox_get_vm_configs:
-    api_user: "{{ proxmox_user }}"
-    api_password: "{{ proxmox_password }}"
-    api_host: "{{ groups['proxmox_host'][0] }}"
-    node: "{{ groups['proxmox_host'][0] }}"
   register: __prox_vm_config
 
 - name: Create additional VMs disks
   shell: |
-    pvesh create /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_config.vm_configs[item.0.key]['vmid'] }}/config -{{ item.1.name }} {{ item.value.vm_storage | default(proxmox_storage) }}:{{ item.1.size }}
-  when: "item.1.name not in __prox_vm_config.vm_configs[item.0.key]"
+    pvesh create \
+        /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_config.vm[item.0.key]['vmid'] }}/config \
+        -{{ item.1.name }} {{ item.value.vm_storage | default(proxmox_storage) }}:{{ item.1.size }}
+  when: "item.1.name not in __prox_vm_config.vm[item.0.key]"
   loop: "{{ vm_scenarios[vm_scenario] | dict2items | subelements('value.disks') }}"
 
 # This crap ALWAYS reports updated even when nothing changes at all

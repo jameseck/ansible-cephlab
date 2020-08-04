@@ -1,0 +1,47 @@
+---
+# Get vm's and see if vmid exists - if it does we want to shut it down
+- name: Retrieve template VM status
+  prox_get_vm_status_by_name:
+  register: __prox_vm_status
+
+- debug:
+    var: __prox_vm_status
+
+- name: Stop running template VMs
+  proxmox_kvm:
+    vmid: "{{ __prox_vm_status.vm[item.key].vmid }}"
+    name: "{{ item.key }}"
+    state: stopped
+    force: yes
+  ignore_errors: yes
+  async: 600
+  poll: 0
+  register: __prox_shutdown_vms
+  loop: "{{ proxmox_templates | dict2items }}"
+  when: item.key in __prox_vm_status.vm and __prox_vm_status.vm[item.key].status == 'running'
+
+- debug:
+    var: __prox_shutdown_vms
+
+- name: Check on "Stop running template VMs" task
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  loop: "{{ __prox_shutdown_vms.results }}"
+  failed_when: false
+  register: __job_result
+  until: __job_result.finished
+  retries: 60
+  delay: 5
+  when: item.item.key in __prox_vm_status.vm and __prox_vm_status.vm[item.item.key].status == 'running'
+
+- name: Wait until template VMs are stopped
+  proxmox_kvm:
+    vmid: "{{ __prox_vm_status.vm[item.key].vmid }}"
+    name: "{{ item.key }}"
+    state: current
+  register: __prox_shutdown_status
+  loop: "{{ proxmox_templates | dict2items }}"
+  retries: 30
+  delay: 2
+  until: '__prox_shutdown_status.msg == "VM " ~ item.key ~ " with vmid = " ~ (__prox_vm_status.vm[item.key].vmid) ~ " is stopped"'
+  when: item.key in __prox_vm_status.vm and __prox_vm_status.vm[item.key].status == 'running'

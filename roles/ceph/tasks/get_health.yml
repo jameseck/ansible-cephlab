@@ -1,8 +1,9 @@
 ---
 - name: Report ceph health
-  shell: ceph -s -f json
-  register: __ceph_health
   become: yes
+  command: ceph -s -f json
+  changed_when: false
+  register: __ceph_health
 
 - name: Show ceph health
   debug:

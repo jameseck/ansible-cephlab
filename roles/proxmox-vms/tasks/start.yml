@@ -6,30 +6,3 @@
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
-
-#- name: "{{ vm_name }}: Get eth0 network info from VM (wait until eth0 is up)"
-#  shell: |
-#    qm guest cmd {{ vm_id }} network-get-interfaces | jq -e '.[] | select(.name=="eth0")["ip-addresses"][]| select(."ip-address-type" == "ipv4")'
-#  changed_when: false
-#  retries: 20
-#  delay: 2
-#  register: __vm_net
-#  until:
-#  - __vm_net is not failed
-#
-#- name: "{{ vm_name }}: Set fact vm_ip"
-#  set_fact:
-#    vm_ip: "{{ (__vm_net.stdout | from_json)['ip-address'] }}"
-#
-## REF: https://www.jeffgeerling.com/blog/2017/adding-strings-array-ansible to work out how to append to a list
-#- name: "{{ vm_name }}: Append vm to vm_details"
-#  set_fact:
-#    vm_details: "{{ vm_details }} + [ '{{ vm_name }} - {{ vm_ip }}' ]"
-#
-#- name: "{{ vm_name }}: add host to inventory"
-#  add_host:
-#    name: "{{ vm_name }}"
-#    groups: "{{ vm_groups }}"
-#    ansible_host: "{{ vm_ip }}"
-#    ansible_user: "{{ vm_ssh_user }}"
-#  changed_when: false

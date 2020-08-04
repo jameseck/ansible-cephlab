@@ -1,12 +1,14 @@
 ---
+# - include_tasks: stop.yml
+
 - name: Destroy VM templates
   proxmox_kvm:
     name: "{{ item.key }}"
-    vmid: "{{ proxmox_template_starting_vmid + index }}"
+    # vmid: "{{ proxmox_template_starting_vmid + index }}"
     state: absent
   loop: "{{ proxmox_templates | dict2items }}"
-  loop_control:
-    index_var: index
+  # loop_control:
+  #   index_var: index
   register: __delete_status
 
 - name: Show VM template delete status

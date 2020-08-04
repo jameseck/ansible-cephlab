@@ -5,14 +5,20 @@ proxmox_template_starting_vmid: 500
 default_vm_cpu_count: 2
 default_vm_memory_mb: 4096
 default_vm_onboot: no
+default_vm_ssh_user: cloud-user
 
 proxmox_templates:
   template-rhel78:
     image: rhel-server-7.8-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
+    rhsm_release: 7.8
   template-rhel82:
     image: rhel-8.2-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
+    rhsm_release: 8.2
   template-rhel81:
     image: rhel-8.1-update-3-x86_64-kvm.qcow2
     src_dir: "{{ qcow_image_local_source_dir | default('/home/iso') }}"
+    rhsm_release: 8.1
+
+__template_vm_details: []  # Only used for reporting - should be left empty

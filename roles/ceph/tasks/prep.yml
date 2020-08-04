@@ -1,7 +1,11 @@
 ---
+- name: Set fact for cluster name
+  set_fact:
+    __ceph_cluster_name: "{{ ceph_cluster_name | default(default_ceph_cluster_name) }}"
+
 - name: Set hostname
   hostname:
-    name: "{{ inventory_hostname }}"
+    name: "{{ inventory_hostname }}.{{ __ceph_cluster_name }}"
 
 - name: Add Ansible inventory mappings to /etc/hosts
   become: yes
@@ -9,7 +13,7 @@
     path: /etc/hosts
     block: |
       {% for host in (groups['all'] | sort) if host != groups['proxmox_host'][0] %}
-      {{ hostvars[host].ansible_host }} {{ host }}
+      {{ hostvars[host].ansible_host }} {{ host }}.{{ __ceph_cluster_name }} {{ host }}
       {% endfor %}
 
 - name: Set timezone
@@ -21,6 +25,7 @@
     state: present
     username: "{{ rhsm_username }}"
     password: "{{ rhsm_password }}"
+    pool_ids: "{{ rhsm_pool_id }}"
     auto_attach: true
   register: __rhsm_register
   retries: 10

@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {'metadata_version': '1.0',
 
 DOCUMENTATION = r'''
 ---
-module: proxmox_get_vm_configs
-short_description: Retrieves VM configs from Proxmox
+module: proxmox_get_vm_status
+short_description: Retrieves all VM statuses from Proxmox
 description:
-  - Retrieves all VM configs from Proxmox
+  - Retrieves all VM statuses from Proxmox
 version_added: "2.8"
 author: "James Eckersall <james.eckersall@gmail.com>"
 options:
@@ -42,7 +42,7 @@ requirements: [ "proxmoxer", "requests" ]
 '''
 
 EXAMPLES = '''
-# Retrieve VM config for all Proxmox VM's on node
+# Retrieve status for all Proxmox VM's on node
 - proxmox_get_vm_configs:
     api_user    : root@pam
     api_password: secret
@@ -51,41 +51,13 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-vm_configs:
-    description: A dict of dicts reflecting VM configs
+vm_status:
+    description: A dict of dicts reflecting VM status
     returned: success
     type: dict
     sample: '
       {
-        u'ceph1': {u'autostart': 0,
-          u'cores': 2,
-          u'memory': 4096,
-          u'name': u'ceph1',
-          u'scsi0': u'storage:base-501-disk-0/vm-600-disk-0,size=10G',
-          u'scsi1': u'storage:vm-600-disk-1,size=20G',
-          u'scsi2': u'storage:vm-600-disk-2,size=20G',
-          u'scsihw': u'virtio-scsi-pci',
-          u'sockets': 1,
-          'vmid': u'600'},
-       u'ceph2': {u'autostart': 0,
-          u'cores': 2,
-          u'memory': 4096,
-          u'name': u'ceph2',
-          u'scsi0': u'storage:base-501-disk-0/vm-601-disk-0,size=10G',
-          u'scsi1': u'storage:vm-601-disk-1,size=20G',
-          u'scsi2': u'storage:vm-601-disk-2,size=20G',
-          u'scsihw': u'virtio-scsi-pci',
-          u'sockets': 1,
-          'vmid': u'601'},
-       u'ceph3': {u'autostart': 0,
-          u'cores': 2,
-          u'memory': 4096,
-          u'name': u'ceph3',
-          u'scsi0': u'storage:base-501-disk-0/vm-602-disk-0,size=10G',
-          u'scsi1': u'storage:vm-602-disk-1,size=20G',
-          u'scsi2': u'storage:vm-602-disk-2,size=20G',
-          u'scsihw': u'virtio-scsi-pci',
-          'vmid': u'602'},
+    TODO: ADD THIS
     }
 '''
 
@@ -130,15 +102,10 @@ def main():
   except Exception as e:
     module.fail_json(msg='Getting information for VMs failed with exception: %s' % e)
 
-  vm_list = []
   vm_dict = {}
 
   for vm in vms:
-    try:
-      vm_dict[vm['name']] = node.qemu(vm['vmid']).config.get()
-    except Exception as e:
-      module.fail_json(msg='Getting information for VM with vmid = %s failed with exception: %s' % (vmid, e))
-    vm_dict[vm['name']]['vmid'] = vm['vmid']
+    vm_dict[vm['vmid']] = vm
 
   response = vm_dict
   module.exit_json(changed=False, vm=response)
