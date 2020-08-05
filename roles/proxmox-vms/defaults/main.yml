@@ -5,3 +5,4 @@ default_vm_cpu_count: 2
 default_vm_memory_mb: 4096
 default_vm_template: template-rhel78
 vm_details: []  # Only used for reporting - should be left empty
+#vm_name_prefix:

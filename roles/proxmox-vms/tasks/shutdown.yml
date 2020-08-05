@@ -2,7 +2,7 @@
 - name: Stop running VMs
   proxmox_kvm:
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
-    name: "{{ item.key }}"
+    name: "{{ vm_name_prefix }}{{ item.key }}"
     state: stopped
     force: yes
   ignore_errors: yes
@@ -27,7 +27,7 @@
 - name: Wait until VMs are stopped
   proxmox_kvm:
     vmid: "{{ proxmox_vm_starting_vmid + index }}"
-    name: "{{ item.key }}"
+    name: "{{ vm_name_prefix }}{{ item.key }}"
     state: current
   register: __prox_shutdown_status
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
@@ -35,7 +35,7 @@
     index_var: index
   retries: 30
   delay: 2
-  until: '__prox_shutdown_status.msg == "VM " ~ item.key ~ " with vmid = " ~ (proxmox_vm_starting_vmid+index) ~ " is stopped"'
+  until: '__prox_shutdown_status.msg == "VM " ~ vm_name_prefix ~ item.key ~ " with vmid = " ~ (proxmox_vm_starting_vmid+index) ~ " is stopped"'
 
 - name: Show shutdown status
   debug:

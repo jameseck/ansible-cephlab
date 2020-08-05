@@ -11,6 +11,8 @@ vm_scenario: compact
 #      disks: # A list of dicts describing additional disks to be added to the VMs (scsi1, scsi2 etc follows the proxmox syntax for disks)
 #      groups: # A list of inventory groups - this is used to build the ceph-ansible inventory file
 
+vm_name_prefix: "{% if ceph_cluster_name %}{{ ceph_cluster_name }}-{% endif %}"
+
 vm_scenarios:
   compact:
     ceph1:
