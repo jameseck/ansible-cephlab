@@ -1,10 +1,11 @@
 ---
 - name: Run ceph-ansible (You can check ~/ansible/ansible.log for details)
-  shell: ansible-playbook -i hosts site.yml
+  command: ansible-playbook -i hosts site.yml
   args:
     chdir: /usr/share/ceph-ansible
   register: __ceph_ansible
   ignore_errors: true
+  changed_when: __ceph_ansible.rc != 0
   async: 3600
   poll: 0
 
@@ -26,7 +27,8 @@
   when: ceph_release == 'rhcs3'
 
 - name: Report ceph health
-  shell: ceph -s -f json
+  command: ceph -s -f json
+  changed_when: false
   register: __ceph_health
   become: yes
 

@@ -42,5 +42,7 @@
 - name: Show VM info
   debug:
     var: vm_details
-- pause:
+
+- name: Pause
+  pause:
     seconds: 5

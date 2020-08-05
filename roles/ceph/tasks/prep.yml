@@ -49,12 +49,12 @@
     state: present
 
 - name: Update packages
-  yum:
+  yum:  # noqa 403
     name: "*"
     state: latest
 
 - name: Check if reboot is required
-  shell: needs-restarting -r
+  command: needs-restarting -r
   failed_when: false
   changed_when: false
   register: __reboot_required

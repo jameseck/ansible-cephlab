@@ -1,7 +1,7 @@
 ---
 - name: Check ceph health
   become: yes
-  shell: ceph -s -f json
+  command: ceph -s -f json
   changed_when: false
   register: __ceph_health
 

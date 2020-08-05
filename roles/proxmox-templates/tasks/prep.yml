@@ -47,19 +47,9 @@
   tags:
   - rhsm
 
-#- name: Set RHSM release
-#  become: yes
-#  rhsm_release:
-#    release: "{{ proxmox_templates[item].rhsm_release }}"
-#  delegate_to: "{{ item }}"
-#  when: proxmox_templates[item].rhsm_release is defined
-#  loop: "{{ groups['templates'] }}"
-#  tags:
-#  - rhsm
-
 - name: Update packages
   become: yes
-  yum:
+  yum:  # noqa 403
     name: "*"
     state: latest
   delegate_to: "{{ item }}"
@@ -84,8 +74,7 @@
 
 - name: Cleanup template
   become: yes
-  shell: |  # noqa 301 303
-    #!/bin/bash
+  shell: |
     set -o pipefail
     yum clean all
     sed -i '/^(HWADDR|UUID)=/d' /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -97,7 +86,11 @@
     rm -rf /var/lib/cloud/instances
     unset HISTFILE
     touch /.unconfigured
+  args:
+    executable: /bin/bash
   failed_when: false
+  register: __prox_template_cleanup
+  changed_when: __prox_template_cleanup.rc != 0
   delegate_to: "{{ item }}"
   loop: "{{ groups['templates'] }}"
 

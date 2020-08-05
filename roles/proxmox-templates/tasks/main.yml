@@ -42,7 +42,6 @@
 
 - name: Get snippet storage path
   shell: |
-    #!/bin/bash
     set -o pipefail
     pvesh get /storage/{{ proxmox_storage_snippets }} --output-format json | jq -r '.path'
   args:
@@ -69,31 +68,30 @@
 
 - name: Import qcow image to template
   shell: |
-    #!/bin/bash
     set -e
     qm importdisk {{ __vm_configs.vm[item.key].vmid }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
     qm set {{ __vm_configs.vm[item.key].vmid }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ __vm_configs.vm[item.key].vmid }}-disk-0
+  args:
+    executable: /bin/bash
   when: __vm_configs.vm[item.key].scsi0 is not defined
   loop: "{{ proxmox_templates | dict2items }}"
 
 - name: Configure template
   shell: |
-    #!/bin/bash
     set -e
     qm set {{ __vm_configs.vm[item.key].vmid }} --ide2 {{ proxmox_storage }}:cloudinit
     qm set {{ __vm_configs.vm[item.key].vmid }} --cicustom user={{ proxmox_storage_snippets }}:snippets/{{ item.key }}-cloud-init.cfg
     qm set {{ __vm_configs.vm[item.key].vmid }} --boot c --bootdisk scsi0
     qm set {{ __vm_configs.vm[item.key].vmid }} --numa 1
+  args:
+    executable: /bin/bash
   when: __vm_configs.vm[item.key].ide2 is not defined
   loop: "{{ proxmox_templates | dict2items }}"
-
-#- debug:
-#    msg: "{{ __vm_configs.vm | dict2items | selectattr('value.template', 'defined') | list }}"
 
 - name: Prepare templates
   include_tasks: prep.yml
 
 - name: Convert to templates
-  shell: qm template {{ __vm_configs.vm[item.key].vmid }}
+  command: qm template {{ __vm_configs.vm[item.key].vmid }}
   when: __vm_configs.vm[item.key].template is not defined or __vm_configs.vm[item.key].template == 0
   loop: "{{ proxmox_templates | dict2items }}"

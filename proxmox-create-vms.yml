@@ -11,7 +11,7 @@
       api_password: "{{ proxmox_password }}"
       api_host: "{{ groups['proxmox_host'][0] }}"
       node: "{{ groups['proxmox_host'][0] }}"
-    prox_get_vm_status_by_name:
+    prox_get_vm_status:
       api_user: "{{ proxmox_user }}"
       api_password: "{{ proxmox_password }}"
       api_host: "{{ groups['proxmox_host'][0] }}"

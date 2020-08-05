@@ -34,11 +34,12 @@
   loop: "{{ cephmetrics_ansible_group_vars_changes | subelements('changes') }}"
 
 - name: Run cephmetrics-ansible (You can check ~/ansible/ansible.log for details)
-  shell: ansible-playbook -i /usr/share/ceph-ansible/hosts playbook.yml
+  command: ansible-playbook -i /usr/share/ceph-ansible/hosts playbook.yml
   args:
     chdir: /usr/share/cephmetrics-ansible
   register: __cephmetrics_ansible
   ignore_errors: true
+  changed_when: __cephmetrics_ansible.rc != 0
   async: 3600
   poll: 0
 

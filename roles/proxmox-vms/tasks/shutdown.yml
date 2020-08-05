@@ -33,7 +33,7 @@
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
   retries: 30
   delay: 2
-  until: '__prox_shutdown_status.msg == "VM " ~ vm_name_prefix ~ item.key ~ " with vmid = " ~ __prox_vm_configs.vm[vm_name_prefix ~ item.key].vmid ~ " is stopped"'
+  until: '__prox_shutdown_status.msg == "VM " ~ vm_name_prefix ~ item.key ~ " with vmid = " ~ __prox_vm_configs.vm[vm_name_prefix ~ item.key].vmid ~ " is stopped"'  # noqa 204
 
 - name: Show shutdown status
   debug:

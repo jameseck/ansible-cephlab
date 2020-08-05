@@ -1,7 +1,7 @@
 ---
 # Get vm's and see if vmid exists - if it does we want to shut it down
 - name: Retrieve template VM status
-  prox_get_vm_status_by_name:
+  prox_get_vm_status:
   register: __prox_vm_status
 
 - debug:

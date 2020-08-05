@@ -78,15 +78,34 @@ def main():
       api_host=dict(required=True),
       api_user=dict(required=True),
       api_password=dict(no_log=True),
-      validate_certs=dict(type='bool', default='no'),
-      node=dict(type='str', default='no')
+      node=dict(type='str', default='no'),
+      validate_certs=dict(type='bool', default='no')
     )
   )
-  api_user = module.params['api_user']
+
   api_host = module.params['api_host']
+  api_user = module.params['api_user']
   api_password = module.params['api_password']
-  validate_certs = module.params['validate_certs']
   node = module.params['node']
+  validate_certs = module.params['validate_certs']
+
+  if not api_host:
+    try:
+      api_host = os.environ['PROXMOX_HOST']
+    except KeyError as e:
+      module.fail_json(msg='You should set api_host param or use PROXMOX_HOST environment variable')
+
+  if not api_user:
+    try:
+      api_user = os.environ['PROXMOX_USER']
+    except KeyError as e:
+      module.fail_json(msg='You should set api_user param or use PROXMOX_USER environment variable')
+
+  if not api_password:
+    try:
+      api_password = os.environ['PROXMOX_PASSWORD']
+    except KeyError as e:
+      module.fail_json(msg='You should set api_password param or use PROXMOX_PASSWORD environment variable')
 
   try:
     proxmox = ProxmoxAPI(api_host, user=api_user, password=api_password, verify_ssl=validate_certs)
@@ -105,7 +124,7 @@ def main():
   vm_dict = {}
 
   for vm in vms:
-    vm_dict[vm['vmid']] = vm
+    vm_dict[vm['name']] = vm
 
   response = vm_dict
   module.exit_json(changed=False, vm=response)
