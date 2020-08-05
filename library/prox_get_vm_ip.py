@@ -89,9 +89,9 @@ def main():
       api_password   = dict(no_log=True),
       validate_certs = dict(type='bool', default='no'),
       node           = dict(type='str', default='no'),
-      vm_id          = dict(type='int', required=True),
-      vm_ip_type     = dict(type='str', default='ipv4'),
-      vm_interface   = dict(type='str', default='eth0')
+      name           = dict(type='str', required=True),
+      ip_type        = dict(type='str', default='ipv4'),
+      interface      = dict(type='str', default='eth0')
     )
   )
   api_user       = module.params['api_user']
@@ -99,9 +99,9 @@ def main():
   api_password   = module.params['api_password']
   validate_certs = module.params['validate_certs']
   node           = module.params['node']
-  vm_id          = module.params['vm_id']
-  vm_ip_type     = module.params['vm_ip_type']
-  vm_interface   = module.params['vm_interface']
+  name           = module.params['name']
+  ip_type        = module.params['ip_type']
+  interface      = module.params['interface']
 
   try:
     proxmox = ProxmoxAPI(api_host, user=api_user, password=api_password, verify_ssl=validate_certs)
@@ -112,12 +112,22 @@ def main():
     module.fail_json(msg='authorization on proxmox cluster failed with exception: %s' % e)
 
   try:
-    vm_ip = proxmox.nodes(node).qemu(vm_id).agent('network-get-interfaces').get()
+    node = proxmox.nodes(node)
+    vms = node.qemu.get()
+
+    # Get the vmid for the vm from vms
+    vm_id = [vm['vmid'] for vm in vms if vm['name'] == name][0]
+
+  except Exception as e:
+    module.fail_json(msg='Getting information for VMs failed with exception: %s' % e)
+
+  try:
+    vm_ip = node.qemu(vm_id).agent('network-get-interfaces').get()
   except Exception as e:
     module.fail_json(msg='Getting IP for VM with vmid %s failed with exception: %s' % (vm_id, e))
 
-  vm_ip_info = [i for i in vm_ip['result'] if i['name'] == vm_interface]
-  vm_ip4_addr = [i for i in vm_ip_info[0]['ip-addresses'] if i['ip-address-type'] == vm_ip_type][0]['ip-address']
+  vm_ip_info = [i for i in vm_ip['result'] if i['name'] == interface]
+  vm_ip4_addr = [i for i in vm_ip_info[0]['ip-addresses'] if i['ip-address-type'] == ip_type][0]['ip-address']
 
   response = vm_ip4_addr
   module.exit_json(changed=False, ip=response)

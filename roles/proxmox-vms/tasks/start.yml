@@ -1,8 +1,6 @@
 ---
 - name: Ensure VMs are started
   proxmox_kvm:
-    vmid: "{{ proxmox_vm_starting_vmid + index }}"
+    name: "{{ vm_name_prefix ~ item.key }}"
     state: started
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-  loop_control:
-    index_var: index

@@ -5,18 +5,16 @@
     api_password: "{{ proxmox_password }}"
     api_host: "{{ groups['proxmox_host'][0] }}"
     node: "{{ groups['proxmox_host'][0] }}"
-    vm_id: "{{ proxmox_vm_starting_vmid + index }}"
-    vm_interface: eth0
+    name: "{{ vm_name_prefix ~ item.key }}"
+    interface: eth0
   changed_when: false
-  retries: 20
+  retries: 1  # 20
   delay: 2
   register: __vm_net
   until:
   - __vm_net is not failed
   - __vm_net.ip
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-  loop_control:
-    index_var: index
 
 - name: Set vm_ips fact
   set_fact:

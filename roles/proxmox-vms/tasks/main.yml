@@ -1,14 +1,78 @@
 ---
-- name: Create VMs
-  include_tasks: create.yml
-  vars:
+- name: Set fact for proxmox_host
+  set_fact:
     proxmox_host: "{{ groups['proxmox_host'][0] }}"
-    vm_network: "{{ item.value.network | default(proxmox_network) }}"
-    vm_template: "{{ item.value.template | default(default_vm_template) }}"
-    vm_storage: "{{ item.value.storage | default(proxmox_storage) }}"
-    cpu_count: "{{ item.value.cpu_count | default(vm_cpu_count) | default(default_vm_cpu_count) }}"
-    memory_mb: "{{ item.value.memory_mb | default(vm_memory_mb) | default(default_vm_memory_mb) }}"
-    vm_disks: "{{ item.value.disks | default({}) }}"
+
+# Create VMs
+#    proxmox_host: "{{ groups['proxmox_host'][0] }}"
+#    vm_network: "{{ item.value.network | default(proxmox_network) }}"
+#    vm_template: "{{ item.value.template | default(default_vm_template) }}"
+#    vm_storage: "{{ item.value.storage | default(proxmox_storage) }}"
+#    cpu_count: "{{ item.value.cpu_count | default(vm_cpu_count) | default(default_vm_cpu_count) }}"
+#    memory_mb: "{{ item.value.memory_mb | default(vm_memory_mb) | default(default_vm_memory_mb) }}"
+#    vm_disks: "{{ item.value.disks | default({}) }}"
+
+- name: Get VM config
+  prox_get_vm_configs:
+  register: __prox_vm_configs
+
+- name: Fail if template does not exist
+  fail:
+    msg: "Template '{{ item.value.template }}' does not exist"
+  when:
+  - item.value.template not in __prox_vm_configs.vm
+  - __prox_vm_configs.vm[item.value.template].template is defined
+  - __prox_vm_configs.vm[item.value.template].template == 1
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+
+- pause:
+
+- name: Create VMs
+  shell: |
+    pvesh create \
+      /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_configs.vm[item.value.template].vmid }}/clone \
+      -name {{ vm_name_prefix }}{{ item.key }} \
+      -newid $(pvesh get /cluster/nextid)
+  when: vm_name_prefix ~ item.key not in __prox_vm_configs.vm
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+
+#- name: Create VMs
+#  shell: |
+#    pvesh create \
+#        /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone \
+#        -newid {{ proxmox_vm_starting_vmid + index }} \
+#        -name {{ vm_name_prefix }}{{ item.key }}
+#  when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (proxmox_vm_starting_vmid + index)|string) | list)"
+#  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+#  loop_control:
+#    index_var: index
+
+- pause:
+
+- name: Get VM config
+  prox_get_vm_configs:
+  register: __prox_vm_configs
+
+- name: Create additional VMs disks
+  shell: |
+    pvesh create \
+        /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_configs.vm[vm_name_prefix ~ item.0.key]['vmid'] }}/config \
+        -{{ item.1.name }} {{ item.value.vm_storage | default(proxmox_storage) }}:{{ item.1.size }}
+  when: "item.1.name not in __prox_vm_configs.vm[vm_name_prefix ~ item.0.key]"
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items | subelements('value.disks') }}"
+
+# This crap ALWAYS reports updated even when nothing changes at all
+- name: Update VMs config
+  proxmox_kvm:
+    name: "{{ vm_name_prefix }}{{ item.key }}"
+    memory: "{{ item.value.memory_mb | default(vm_memory_mb) }}"
+    cores: "{{ item.value.cpu_count | default(vm_cpu_count) }}"
+    update: yes
+  changed_when: false
+  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+
+# TODO: Add some code to handle updating the SSH key
+
 
 - name: Start VMs
   include_tasks: start.yml
