@@ -25,8 +25,6 @@
   - __prox_vm_configs.vm[item.value.template].template == 1
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
 
-- pause:
-
 - name: Create VMs
   shell: |
     pvesh create \
@@ -35,19 +33,6 @@
       -newid $(pvesh get /cluster/nextid)
   when: vm_name_prefix ~ item.key not in __prox_vm_configs.vm
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-
-#- name: Create VMs
-#  shell: |
-#    pvesh create \
-#        /nodes/{{ proxmox_host }}/qemu/{{ (vm_templates | selectattr('name', 'equalto', vm_template) | list).0.vmid }}/clone \
-#        -newid {{ proxmox_vm_starting_vmid + index }} \
-#        -name {{ vm_name_prefix }}{{ item.key }}
-#  when: "not (vm_list | selectattr('id', 'equalto', 'qemu/' + (proxmox_vm_starting_vmid + index)|string) | list)"
-#  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-#  loop_control:
-#    index_var: index
-
-- pause:
 
 - name: Get VM config
   prox_get_vm_configs:

@@ -1,7 +1,4 @@
 ---
-# The templates are created with predefined vmid's since the proxmox_kvm module makes it difficult to consume dynamic vmids
-proxmox_template_starting_vmid: 500
-
 default_vm_cpu_count: 2
 default_vm_memory_mb: 4096
 default_vm_onboot: no

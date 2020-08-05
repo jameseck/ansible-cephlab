@@ -4,12 +4,9 @@
 
 - name: delete VM
   proxmox_kvm:
-    vmid: "{{ proxmox_vm_starting_vmid + index }}"
     name: "{{ vm_name_prefix }}{{ item.key }}"
     state: absent
   loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
-  loop_control:
-    index_var: index
   register: __delete_status
 
 - name: Show delete status
