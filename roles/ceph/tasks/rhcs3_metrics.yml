@@ -39,7 +39,7 @@
     chdir: /usr/share/cephmetrics-ansible
   register: __cephmetrics_ansible
   ignore_errors: true
-  changed_when: __cephmetrics_ansible.rc != 0
+  #changed_when: __cephmetrics_ansible.rc != 0
   async: 3600
   poll: 0
 

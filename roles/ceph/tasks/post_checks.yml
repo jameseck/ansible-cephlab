@@ -42,3 +42,4 @@
   delay: 5
   register: __check_ceph_dash
   until: __check_ceph_dash is not failed
+  when: ceph_release != 'rhcs3'

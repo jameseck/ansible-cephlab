@@ -69,8 +69,8 @@
 - name: Import qcow image to template
   shell: |
     set -e
-    qm importdisk {{ __vm_configs.vm[item.key].vmid }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ proxmox_storage }}
-    qm set {{ __vm_configs.vm[item.key].vmid }} --scsihw virtio-scsi-pci --scsi0 {{ proxmox_storage }}:vm-{{ __vm_configs.vm[item.key].vmid }}-disk-0
+    qm importdisk {{ __vm_configs.vm[item.key].vmid }} {{ proxmox_template_qcow_storage_dir }}/{{ item.value.image }} {{ item.value['storage'] | default(proxmox_storage) }}
+    qm set {{ __vm_configs.vm[item.key].vmid }} --scsihw virtio-scsi-pci --scsi0 {{ item.value['storage'] | default(proxmox_storage) }}:vm-{{ __vm_configs.vm[item.key].vmid }}-disk-0
   args:
     executable: /bin/bash
   when: __vm_configs.vm[item.key].scsi0 is not defined
@@ -79,7 +79,7 @@
 - name: Configure template
   shell: |
     set -e
-    qm set {{ __vm_configs.vm[item.key].vmid }} --ide2 {{ proxmox_storage }}:cloudinit
+    qm set {{ __vm_configs.vm[item.key].vmid }} --ide2 {{ item.value['storage'] | default(proxmox_storage) }}:cloudinit
     qm set {{ __vm_configs.vm[item.key].vmid }} --cicustom user={{ proxmox_storage_snippets }}:snippets/{{ item.key }}-cloud-init.cfg
     qm set {{ __vm_configs.vm[item.key].vmid }} --boot c --bootdisk scsi0
     qm set {{ __vm_configs.vm[item.key].vmid }} --numa 1

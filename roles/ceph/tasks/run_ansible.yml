@@ -5,7 +5,7 @@
     chdir: /usr/share/ceph-ansible
   register: __ceph_ansible
   ignore_errors: true
-  changed_when: __ceph_ansible.rc != 0
+  #changed_when: __ceph_ansible.rc != 0
   async: 3600
   poll: 0
 
