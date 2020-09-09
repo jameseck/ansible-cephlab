@@ -1,6 +1,6 @@
 ---
 # Pick one of the scenarios described in the vm_scenarios dict below
-vm_scenario: compact
+default_vm_scenario: compact
 
 # Describes the scenarios you wish to create - should be fairly self explanatory
 #
@@ -28,6 +28,7 @@ vm_scenarios:
       - osds
       - mdss
       - grafana-server
+      - ceph-grafana
       - clients
     ceph2:
       template: "{{ vm_default_template }}"
@@ -52,6 +53,50 @@ vm_scenarios:
       - mons
       - mgrs
       - osds
+  compact-with-rgw:
+    ceph1:
+      template: "{{ vm_default_template }}"
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
+      groups:
+      - mons
+      - mgrs
+      - osds
+      - mdss
+      - grafana-server
+      - ceph-grafana
+      - clients
+    ceph2:
+      template: "{{ vm_default_template }}"
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
+      groups:
+      - mons
+      - mgrs
+      - osds
+      - mdss
+    ceph3:
+      template: "{{ vm_default_template }}"
+      disks:
+      - name: scsi1
+        size: 20
+      - name: scsi2
+        size: 20
+      groups:
+      - mons
+      - mgrs
+      - osds
+    cephrgw1:
+      template: "{{ vm_default_template }}"
+      disks: []
+      groups:
+      - rgws
   full:
     mon1:
       template: "{{ vm_default_template }}"
@@ -59,6 +104,7 @@ vm_scenarios:
       - mons
       - mgrs
       - grafana-server
+      - ceph-grafana
       - clients
     mon2:
       template: "{{ vm_default_template }}"

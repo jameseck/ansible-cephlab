@@ -7,6 +7,8 @@ default_vm_timezone: UTC
 ceph_dashboard_admin_password: p@ssw0rd
 ceph_grafana_admin_password: p@ssw0rd
 
+ceph_containerized: true
+
 # Currently we are going to just enable all ceph repos on all nodes
 # as it's complicated to work out which nodes need which repos
 ceph_repos:
@@ -28,35 +30,65 @@ ceph_repos:
     - rhel-7-server-extras-rpms
     - rhel-7-server-ansible-2.6-rpms
     - rhel-7-server-rhceph-3-tools-rpms
+  rhcs2:
+    "7":
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    #- rhel-7-server-ansible-2.6-rpms
+    - rhel-7-server-rhceph-2-tools-rpms
+    - rhel-7-server-rhceph-2-mon-rpms
+    - rhel-7-server-rhceph-2-osd-rpms
 
 ceph_ansible_cfg_changes:
 - section: defaults
   option: log_path
   value: "/home/{{ ansible_user }}/ansible/ansible.log"
+- section: ssh_connection
+  option: pipelining
+  value: True
+- section: ssh_connection
+  option: ssh_args
+  value: "-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s"
+
+# This can be overrided if required, but defaults are:
+# rhcs2: collocated
+# rhcs3: lvm
+# rhcs4: lvm
+ceph_osd_scenario: "{% if ceph_release in [ 'rhcs3', 'rhcs4'] %}lvm{% else %}collocated{% endif %}"
 
 ceph_ansible_group_vars_changes:
 - name: osds.yml
   changes:
-  - regexp: '^#osd_auto_discovery: false$'
+  - regexp: '^osd_auto_discovery: '
     line: 'osd_auto_discovery: true'
-  - regexp: '^#osd_scenario: dummy$'
-    line: 'osd_scenario: collocated'
+  - regexp: '^osd_scenario: '
+    line: "osd_scenario: {{ ceph_osd_scenario }}"
 - name: all.yml
   changes:
   - regexp: '^ceph_origin: repository'
     line: 'ceph_origin: distro'
-  - regexp: '^#monitor_interface: interface'
+  - regexp: '^monitor_interface: '
     line: 'monitor_interface: eth0'
-  - regexp: '^containerized_deployment: False'
-    line: 'containerized_deployment: True'
-  - regexp: '^#ceph_docker_registry_username:'
+  - regexp: '^radosgw_interface: '
+    line: 'radosgw_interface: eth0'
+  - regexp: '^containerized_deployment: '
+    line: "containerized_deployment: {{ ceph_containerized }}"
+  - regexp: '^ceph_docker_registry_username: '
     line: !unsafe "ceph_docker_registry_username: \"{{ '{{' }} rhsm_username {{ '}}' }}\""
-  - regexp: '^#ceph_docker_registry_password:'
+  - regexp: '^ceph_docker_registry_password: '
     line: !unsafe "ceph_docker_registry_password: \"{{ '{{' }} rhsm_password {{ '}}' }}\""
-  - regexp: '^#dashboard_admin_password:'
+  - regexp: '^dashboard_admin_password: '
     line: !unsafe "dashboard_admin_password: \"{{ '{{' }} ceph_dashboard_admin_password {{ '}}' }}\""
-  - regexp: '^#grafana_admin_password:'
+  - regexp: '^grafana_admin_password: '
     line: !unsafe "grafana_admin_password: \"{{ '{{' }} ceph_grafana_admin_password {{ '}}' }}\""
+  - regexp: '^public_network: '
+    line: "public_network: {{ public_network | default((ansible_default_ipv4.network ~ '/' ~ ansible_default_ipv4.netmask) | ipaddr('net')) }}"
+  - regexp: '^cluster_network: '
+    line: "cluster_network: {{ cluster_network | default((ansible_default_ipv4.network ~ '/' ~ ansible_default_ipv4.netmask) | ipaddr('net')) }}"
+- name: mgrs.yml
+  changes:
+  - regexp: '^ceph_mgr_modules: '
+    line: 'ceph_mgr_modules: [status,prometheus]'
 
 cephmetrics_ansible_cfg_changes:
 - section: defaults

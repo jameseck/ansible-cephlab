@@ -23,6 +23,7 @@
     remote_src: yes
     force: no
   become: yes
+  when: ceph_release == 'rhcs3'
 
 - name: Modify group_vars files
   become: yes
@@ -32,6 +33,7 @@
     line: "{{ item.1.line }}"
     state: present
   loop: "{{ cephmetrics_ansible_group_vars_changes | subelements('changes') }}"
+  when: ceph_release == 'rhcs3'
 
 - name: Run cephmetrics-ansible (You can check ~/ansible/ansible.log for details)
   command: ansible-playbook -i /usr/share/ceph-ansible/hosts playbook.yml

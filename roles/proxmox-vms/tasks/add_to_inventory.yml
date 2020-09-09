@@ -14,7 +14,7 @@
   until:
   - __vm_net is not failed
   - __vm_net.ip
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
 
 - name: Set vm_ips fact
   set_fact:
@@ -24,7 +24,7 @@
 - name: Append VMs to vm_details var
   set_fact:
     vm_details: "{{ vm_details }} + [ '{{ vm_name_prefix }}{{ item.key }} - {{ vm_ips[index] }}' ]"
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
 
@@ -35,7 +35,7 @@
     ansible_host: "{{ vm_ips[index] }}"
     ansible_user: "{{ item.value.ssh_user | default(default_vm_ssh_user) }}"
   changed_when: false
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
   loop_control:
     index_var: index
 

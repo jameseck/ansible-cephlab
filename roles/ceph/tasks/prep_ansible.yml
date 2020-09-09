@@ -23,6 +23,15 @@
     dest: /usr/share/ceph-ansible/site.yml
     remote_src: yes
     force: no
+  when: ceph_containerized | bool is true
+
+- name: Seed site.yml non-containerized
+  copy:
+    src: /usr/share/ceph-ansible/site.yml.sample
+    dest: /usr/share/ceph-ansible/site.yml
+    remote_src: yes
+    force: no
+  when: ceph_containerized | bool is false
 
 - name: Seed group_vars files from sample files
   copy:

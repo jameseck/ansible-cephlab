@@ -39,3 +39,4 @@ rhsm_password=
 # ceph_release=rhcs4
 # Set this to have multiple ceph clusters
 ceph_cluster_name=cluster1
+ceph_containerized=true

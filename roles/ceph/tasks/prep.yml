@@ -26,11 +26,13 @@
     username: "{{ rhsm_username }}"
     password: "{{ rhsm_password }}"
     pool_ids: "{{ rhsm_pool_id }}"
-    auto_attach: true
+    #auto_attach: true
   register: __rhsm_register
   retries: 10
   delay: 1
   until: __rhsm_register is not failed
+  tags:
+  - rhsm
 
 # Declaring the repositories in a comma-separated string is much faster than a loop with a list
 - name: Enable rhsm repositories
@@ -40,6 +42,8 @@
   retries: 10
   delay: 1
   until: __rhsm_repos is not failed
+  tags:
+  - rhsm
 
 # We install the ceph-common package so it's easy to run "ceph -s" etc commands on the ceph nodes without having
 # to docker/podman exec
@@ -48,10 +52,42 @@
     name: ceph-common
     state: present
 
+- name: Install dnsmasq
+  package:
+    name: dnsmasq
+    state: present
+
+- name: make sure line 'dns=dnsmasq' is set in /etc/NetworkManager/conf.d/999-dnsmasq.conf
+  ini_file:
+    path: /etc/NetworkManager/conf.d/999-dnsmasq.conf
+    state: present
+    no_extra_spaces: yes
+    section: main
+    option: dns
+    value: dnsmasq
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify:
+    - reload NetworkManager
+
+- name: Create dnsmasq config to use /etc/hosts file
+  copy:
+    dest: /etc/NetworkManager/dnsmasq.d/hosts.conf
+    content: "addn-hosts=/etc/hosts"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload NetworkManager
+
 - name: Update packages
   yum:  # noqa 403
     name: "*"
     state: latest
+  tags:
+  - yum-update
 
 - name: Check if reboot is required
   command: needs-restarting -r

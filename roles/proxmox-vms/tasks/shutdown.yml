@@ -12,7 +12,7 @@
   async: 600
   poll: 0
   register: __prox_shutdown_vms
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
 
 - name: Check on "Stop running VMs" task
   async_status:
@@ -30,7 +30,7 @@
     name: "{{ vm_name_prefix }}{{ item.key }}"
     state: current
   register: __prox_shutdown_status
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
   retries: 30
   delay: 2
   until: '__prox_shutdown_status.msg == "VM " ~ vm_name_prefix ~ item.key ~ " with vmid = " ~ __prox_vm_configs.vm[vm_name_prefix ~ item.key].vmid ~ " is stopped"'  # noqa 204

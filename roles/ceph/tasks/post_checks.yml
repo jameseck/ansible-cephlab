@@ -5,14 +5,23 @@
   changed_when: false
   register: __ceph_health
 
+- debug:
+    msg: "{{ __ceph_health.stdout | from_json }}"
+
 - name: Get ceph health
   set_fact:
-    ceph_health: "{{ (__ceph_health.stdout | from_json).health }}"
+    ceph_health: "{{ (__ceph_health.stdout | from_json).health.status }}"
+  when: ceph_release in [ 'rhcs3', 'rhcs4' ]
+
+- name: Get ceph health
+  set_fact:
+    ceph_health: "{{ (__ceph_health.stdout | from_json).health.overall_status }}"
+  when: ceph_release == 'rhcs2'
 
 - name: Fail if ceph health is not WARN or OK)
   fail:
-    msg: "Ceph health is bad: {{ ceph_health.status }}"
-  when: ceph_health.status not in [ 'HEALTH_OK', 'HEALTH_WARN' ]
+    msg: "Ceph health is bad: {{ ceph_health }}"
+  when: ceph_health not in [ 'HEALTH_OK', 'HEALTH_WARN' ]
 
 - name: Show ceph health
   debug:
@@ -22,7 +31,7 @@
   uri:
     url: "http://{{ hostvars[groups['mons'][0]].ansible_host }}:3000/api/org"
     user: admin
-    password: "{{ ceph_grafana_admin_password }}"
+    password: "{{ 'admin' if ceph_release == 'rhcs2' else ceph_grafana_admin_password }}"
     force_basic_auth: yes
     status_code: 200
   retries: 10
@@ -30,7 +39,7 @@
   register: __check_grafana_dash
   until: __check_grafana_dash is not failed
 
-- name: Check ceph dashboard is working (unsupported on rhcs3)
+- name: Check ceph dashboard is working (unsupported on rhcs2,3)
   uri:
     url: "http://{{ hostvars[groups['mons'][0]].ansible_host }}:8443"
     follow_redirects: all
@@ -42,4 +51,4 @@
   delay: 5
   register: __check_ceph_dash
   until: __check_ceph_dash is not failed
-  when: ceph_release != 'rhcs3'
+  when: ceph_release not in [ 'rhcs2', 'rhcs3' ]

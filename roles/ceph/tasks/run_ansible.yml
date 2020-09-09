@@ -22,9 +22,14 @@
   debug:
     var: __job_result
 
+- name: Fail if ceph-ansible fails
+  fail:
+    msg: "ceph-ansible failed - check the ansible log"
+  when: __job_result is failed
+
 - name: Include cephmetrics
-  import_tasks: rhcs3_metrics.yml
-  when: ceph_release == 'rhcs3'
+  import_tasks: ceph_metrics.yml
+  when: ceph_release in [ 'rhcs2', 'rhcs3' ]
 
 - name: Report ceph health
   command: ceph -s -f json

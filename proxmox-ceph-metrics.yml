@@ -1,0 +1,3 @@
+---
+- import_playbook: proxmox-ceph-add-to-inventory.yml
+- import_playbook: ceph-metrics.yml

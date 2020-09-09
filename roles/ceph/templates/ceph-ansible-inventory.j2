@@ -6,11 +6,6 @@
 
 {% endfor %}
 
-{% if ceph_release == 'rhcs3' %}
-[ceph-grafana]
-{{ groups['mons'][0] }} ansible_host={{ hostvars[groups['mons'][0]].ansible_host }} ansible_user={{ hostvars[groups['mons'][0]].ansible_user }}
-{% endif %}
-
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 

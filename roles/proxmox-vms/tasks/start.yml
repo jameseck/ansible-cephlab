@@ -3,4 +3,4 @@
   proxmox_kvm:
     name: "{{ vm_name_prefix ~ item.key }}"
     state: started
-  loop: "{{ vm_scenarios[vm_scenario] | dict2items }}"
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
