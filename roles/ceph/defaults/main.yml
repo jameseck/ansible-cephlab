@@ -109,3 +109,13 @@ cephmetrics_ansible_group_vars_changes:
   # rather than the actual value but something about cephmetrics-ansible doesn't like this so hardcoded it is
   - regexp: 'admin_password: '
     line: "  admin_password: {{ ceph_grafana_admin_password }}"
+
+yum_conf_excludes: []
+#- "ceph-*10.2.10*"
+#- "libcephfs*-10.2.10*"
+#- "librados*-10.2.10*"
+#- "librbd*-10.2.10*"
+#- "librgw*-10.2.10*"
+#- "python-cephfs*10.2.10*"
+#- "python-rados*10.2.10*"
+#- "python-rbd*10.2.10*"

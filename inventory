@@ -35,6 +35,8 @@ admin_ssh_key=
 rhsm_username=
 rhsm_password=
 #rhsm_pool_id=
+# Use this to download qcow images directly from rhsm
+#rhsm_token=
 # Set this to change the ceph release - default is rhcs4 (in roles/ceph/defaults/main.yml)
 # ceph_release=rhcs4
 # Set this to have multiple ceph clusters

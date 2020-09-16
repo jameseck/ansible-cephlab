@@ -45,6 +45,15 @@
   tags:
   - rhsm
 
+- name: Apply any yum.conf package excludes
+  ini_file:
+    path: /etc/yum.conf
+    section: main
+    option: exclude
+    value: "{{ yum_conf_excludes | join(',') }}"
+    state: present
+  when: yum_conf_excludes
+
 # We install the ceph-common package so it's easy to run "ceph -s" etc commands on the ceph nodes without having
 # to docker/podman exec
 - name: Install ceph-common package
