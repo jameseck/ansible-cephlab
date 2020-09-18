@@ -52,7 +52,7 @@
     option: exclude
     value: "{{ yum_conf_excludes | join(',') }}"
     state: present
-  when: yum_conf_excludes
+  when: yum_conf_excludes | bool
 
 # We install the ceph-common package so it's easy to run "ceph -s" etc commands on the ceph nodes without having
 # to docker/podman exec
