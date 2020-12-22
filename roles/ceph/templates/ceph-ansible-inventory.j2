@@ -9,7 +9,11 @@
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
+{% if rhsm_username is defined %}
 rhsm_username={{ rhsm_username }}
+{% endif %}
+{% if rhsm_password is defined %}
 rhsm_password={{ rhsm_password }}
+{% endif %}
 ceph_dashboard_admin_password="{{ ceph_dashboard_admin_password }}"
 ceph_grafana_admin_password="{{ ceph_grafana_admin_password }}"

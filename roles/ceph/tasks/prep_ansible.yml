@@ -19,7 +19,7 @@
 
 - name: Seed site.yml containerized
   copy:
-    src: /usr/share/ceph-ansible/site-container.yml.sample
+    src: "{{ lookup('first_found', ['/usr/share/ceph-ansible/site-container.yml.sample', '/usr/share/ceph-ansible/site-docker.yml.sample']) }}"
     dest: /usr/share/ceph-ansible/site.yml
     remote_src: yes
     force: no

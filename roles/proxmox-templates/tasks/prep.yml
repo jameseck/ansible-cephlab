@@ -99,7 +99,7 @@
       yum clean all
       sed -i '/^(HWADDR|UUID)=/d' /etc/sysconfig/network-scripts/ifcfg-eth0
       > /etc/machine-id
-      rm –rf /tmp/* /var/tmp/*
+      rm -rf /tmp/* /var/tmp/*
       rm -f /etc/ssh/ssh_host_* /root/.bash_history
       rm -f /var/log/{cron,dmesg,grubby,lastlog,maillog,messages,secure,spooler,tallylog,wtmp,*.log}
       rm -f /var/log/audit/audit.log /var/log/ovirt-guest-agent/ovirt-guest-agent.log /var/log/tuned/tuned.log

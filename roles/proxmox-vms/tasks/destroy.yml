@@ -6,6 +6,7 @@
   proxmox_kvm:
     name: "{{ vm_name_prefix }}{{ item.key }}"
     state: absent
+    timeout: 600
   loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
   register: __delete_status
 

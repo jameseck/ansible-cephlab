@@ -64,5 +64,5 @@ Reducing the amount of assigned memory may result in an error from the Proxmox A
 Ceph
 ====
 
-For rhcs3, there is an additional task (roles/ceph/tasks/rhcs3_metrics.yml) which is called by roles/ceph/tasks/run_ansible.yml
+For rhcs2 and rhcs3, there is an additional task (roles/ceph/tasks/ceph_metrics.yml) which is called by roles/ceph/tasks/run_ansible.yml
 For rhcs4, the metrics are deployed by ceph-ansible

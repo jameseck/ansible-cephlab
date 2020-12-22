@@ -29,6 +29,18 @@
   prox_get_vm_configs:
   register: __prox_vm_configs
 
+- name: Set VM network interface
+  shell: |
+    pvesh set \
+        /nodes/{{ proxmox_host }}/qemu/{{ __prox_vm_configs.vm[vm_name_prefix ~ item.key]['vmid'] }}/config \
+        -net0 'virtio,bridge={{ proxmox_network }}'
+  loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
+  when: __prox_vm_configs.vm[vm_name_prefix ~ item.key]["net0"] is not search("bridge=" ~ proxmox_network)
+
+- name: Get VM config
+  prox_get_vm_configs:
+  register: __prox_vm_configs
+
 - name: Create additional VMs disks
   shell: |
     pvesh create \
@@ -48,7 +60,6 @@
   loop: "{{ vm_scenarios[__vm_scenario] | dict2items }}"
 
 # TODO: Add some code to handle updating the SSH key
-
 
 - name: Start VMs
   include_tasks: start.yml

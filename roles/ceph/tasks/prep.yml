@@ -3,6 +3,16 @@
   set_fact:
     __ceph_cluster_name: "{{ ceph_cluster_name | default(default_ceph_cluster_name) }}"
 
+- name: Create cloud-init override for Network Manager - to fix dns
+  copy:
+    dest: /etc/NetworkManager/conf.d/9A-override-99-cloud-init.conf
+    content: |
+      [main]
+      dns = default
+  notify: reload NetworkManager
+
+- meta: flush_handlers
+
 - name: Set hostname
   hostname:
     name: "{{ inventory_hostname }}.{{ __ceph_cluster_name }}"
@@ -31,8 +41,12 @@
   retries: 10
   delay: 1
   until: __rhsm_register is not failed
-  tags:
-  - rhsm
+  when: rhsm_method == 'portal'
+
+- name: import openstack.redhat-subscription role
+  include_role:
+    name: openstack.redhat-subscription
+  when: rhsm_method == 'satellite'
 
 # Declaring the repositories in a comma-separated string is much faster than a loop with a list
 - name: Enable rhsm repositories
@@ -90,6 +104,8 @@
     mode: 0644
   notify:
     - reload NetworkManager
+
+- meta: flush_handlers
 
 - name: Update packages
   yum:  # noqa 403

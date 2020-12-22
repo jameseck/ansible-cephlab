@@ -4,3 +4,6 @@
     state: absent
     username: "{{ rhsm_username }}"
     password: "{{ rhsm_password }}"
+  when: rhsm_method is defined and rhsm_method == 'portal'
+
+# TODO: add removal for satellite here too

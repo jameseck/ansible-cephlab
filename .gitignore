@@ -3,3 +3,4 @@ secret_inventory
 .*.kate-swp
 ceph-ansible-inventory
 callback_plugins/
+ansible_roles/

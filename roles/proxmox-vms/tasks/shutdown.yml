@@ -8,6 +8,7 @@
     name: "{{ vm_name_prefix }}{{ item.key }}"
     state: stopped
     force: yes
+    timeout: 600
   ignore_errors: yes
   async: 600
   poll: 0
